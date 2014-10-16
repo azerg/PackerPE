@@ -1,4 +1,6 @@
 PackerPE
 ========
 
-simple PE packer written in C++
+PE packer written in C++
+
+UNDER CONSTRUCTION
