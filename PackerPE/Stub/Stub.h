@@ -13,10 +13,10 @@ typedef struct STUB_DATA_
     fpRtlDecompressBuffer pRtlDecompressBuffer;
     DWORD unused_iatnull_1;
     DWORD dwImageBase;
-	DWORD dwOriginalEP;
-	DWORD dwOriIAT;
-	DWORD dwOriginalIVA;				//Original Virtual Address Of Import
-	DWORD dwOriginalIS;					//Original Size Of Import
+  DWORD dwOriginalEP;
+  DWORD dwOriIAT;
+  DWORD dwOriginalIVA;        //Original Virtual Address Of Import
+  DWORD dwOriginalIS;          //Original Size Of Import
 }STUB_DATA, *PSTUB_DATA;
 
 
