@@ -177,30 +177,22 @@ void CGUIDlg::OnBnClickedPack()
 {
   CString szEditPath;
   this->m_EditPath.GetWindowText( szEditPath );
-  if( szEditPath.IsEmpty() )
+  if (!szEditPath.IsEmpty() && this->m_SimplePackPE.IsValidPE(szEditPath))
   {
     this->m_ProgressCtrl.ShowWindow( SW_SHOW );
     this->m_ProgressCtrl.SetPos( 0 );
     if( this->m_SimplePackPE.IsValidPE( szEditPath ) )
     {
       this->m_ProgressCtrl.SetPos( 25 );
-      // szFilters is a text string that includes two file name filters:
-      wchar_t szFilters[] = L"Exe Files(*.exe)|*.exe|All Files (*.*)|*.*||";
-      // Create a Save dialog; the default file name extension is ".exe".
-      CFileDialog fileDlg (FALSE, L"exe", L"",OFN_FILEMUSTEXIST, szFilters, this);
-      // Display the file dialog. When user clicks OK, fileDlg.DoModal() 
-      // returns IDOK.
-      if( fileDlg.DoModal() == IDOK )
+
+      if (this->m_SimplePackPE.PackPE(szEditPath, szEditPath) == TRUE)
       {
-        if( this->m_SimplePackPE.PackPE( szEditPath, fileDlg.GetPathName() ) == TRUE)
-        {
-          this->m_ProgressCtrl.SetPos( 100 );
-          MessageBox(L"Pack done ...",L"Message",0);
-        }
-        else
-        {
-          this->m_ProgressCtrl.SetPos( 0 );
-        }
+        this->m_ProgressCtrl.SetPos( 100 );
+        MessageBox(L"Pack done ...",L"Message",0);
+      }
+      else
+      {
+        this->m_ProgressCtrl.SetPos( 0 );
       }
      }
   }

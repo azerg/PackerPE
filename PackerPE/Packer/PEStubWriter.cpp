@@ -138,7 +138,7 @@ namespace PE
     ImageImportDescriptor.TimeDateStamp = 0;
     ImageImportDescriptor.ForwarderChain = 0;
     ImageImportDescriptor.Name = TargetPE.FileOffsetToRva( ( DWORD )pAddressOfUncompressDllName - ( DWORD )TargetPE.GetMemPtr() );
-    ImageImportDescriptor.FirstThunk = TargetPE.FileOffsetToRva( ( DWORD ) pStubDataAddress + sizeof(DWORD)*3 - ( DWORD )TargetPE.GetMemPtr()/*( DWORD )pAddressOfFirstThunkUncompressDll - ( DWORD )TargetPE.GetMemPtr()*/ );
+    ImageImportDescriptor.FirstThunk = TargetPE.FileOffsetToRva( ( DWORD ) pStubDataAddress + sizeof(DWORD)*3 - ( DWORD )TargetPE.GetMemPtr() );
     // Add new descriptor with Uncompress dll
     memcpy( reinterpret_cast< PVOID > ( pCurOffset + sizeof( IMAGE_IMPORT_DESCRIPTOR ) ), &ImageImportDescriptor, sizeof( IMAGE_IMPORT_DESCRIPTOR ) );
 
@@ -156,10 +156,10 @@ namespace PE
 
     void PEStubWriter::FillStubData( PE::MemPEFile& TargetPE, __out STUB_DATA& StubData )
     {
-        // fill EntryPoint addr
-        StubData.dwOriginalEP = TargetPE.GetOptionalHead32()->AddressOfEntryPoint;
-    StubData.dwOriginalIVA = TargetPE.GetOptionalHead32()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
-    StubData.dwOriginalIS = TargetPE.GetOptionalHead32()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size;
+      // fill EntryPoint addr
+      StubData.dwOriginalEP = TargetPE.GetOptionalHead32()->AddressOfEntryPoint;
+      StubData.dwOriginalIVA = TargetPE.GetOptionalHead32()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+      StubData.dwOriginalIS = TargetPE.GetOptionalHead32()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size;
     }
 
     void PEStubWriter::SetNewEntryPoint( ULONG dwNewEntryPoint, PE::MemPEFile& TargetPE )
