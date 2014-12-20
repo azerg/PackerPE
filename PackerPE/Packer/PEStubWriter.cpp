@@ -6,6 +6,11 @@
 
 namespace PE
 {
+  // list of import table ofpacket executable
+  std::forward_list<ImportEntry> lala = boost::assign::list_of<ImportEntry>
+    ({{"RtlDecompressBuffer"}, "ntdll.dll"})
+    ({{"LoadLibraryA", "GetProcAddress"}, "KERNEL32.dll"})
+    ({{"MessageBoxA"}, "user32.dll"});
 
   PEStubWriter::PEStubWriter(void)
   {
@@ -248,7 +253,7 @@ namespace PE
             &WorkSpace.front()
             );
 
-        AlignPackedSize = TargetPE.AlignUp( PackedSize, dwFileAlignment );
+        AlignPackedSize = AlignUp( PackedSize, dwFileAlignment );
         diffSize = AlignPackedSize - PackedSize;
         // Append section buffer with zeroes to fit FileAlignment value
         if( diffSize > 0 )

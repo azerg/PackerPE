@@ -5,15 +5,6 @@
 namespace PE
 {
 
-  PEFile::PEFile( ULONG_PTR pFileBuff )
-  {
-    Reset( pFileBuff );
-  }
-
-  PEFile::~PEFile(void)
-  {
-  }
-
   PIMAGE_DOS_HEADER PEFile::GetDOSHead()
   {
     return reinterpret_cast<PIMAGE_DOS_HEADER>( m_pFileBuff );
@@ -83,17 +74,6 @@ namespace PE
     return pNewSection;
   }
 
-  DWORD PEFile::AlignDown(DWORD val, DWORD align) const
-  {
-    return ( val & ~( align - 1 ) );
-  }
-
-
-  DWORD PEFile::AlignUp(DWORD val, DWORD align) const
-  {
-    return ( ( val & ( align - 1 ) ) ? AlignDown( val, align ) + align : val );
-  }
-
   DWORD PEFile::RvaToFileOffset(DWORD rva)
   {
     PIMAGE_FILE_HEADER pFileHead = GetFileHead();
@@ -142,14 +122,14 @@ namespace PE
     return ( PIMAGE_IMPORT_BY_NAME ) ( m_pFileBuff + RvaToFileOffset( pThunkData->u1.AddressOfData ) );
   }
 
-  WORD PEFile::GetNumberOfImportedDlls( )
+  WORD PEFile::GetNumberOfImportedDlls()
   {
     PIMAGE_IMPORT_DESCRIPTOR pFirstImportDescriptor = GetImportDescriptor();
     WORD numberOfImportedDlls = 0;
     while( pFirstImportDescriptor->Name )
     {
-      numberOfImportedDlls++;
-      pFirstImportDescriptor++;
+      ++numberOfImportedDlls;
+      ++pFirstImportDescriptor;
     }
     return numberOfImportedDlls;
   }

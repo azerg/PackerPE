@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include "../PELib/MemFile.h"
 #include "Stub.h"
+#include <forward_list>
+#include <boost/assign.hpp>
 
 #define COMPRESSION_FORMAT_LZNT1     (0x0002)
 #define COMPRESSION_ENGINE_MAXIMUM   (0x0100)
@@ -14,6 +16,12 @@ namespace PE
   typedef NTSTATUS ( __stdcall *fpRtlDecompressBuffer )( USHORT, PUCHAR, ULONG, PUCHAR, ULONG, PULONG );
   typedef NTSTATUS ( __stdcall *fpRtlCompressBuffer )( USHORT, PUCHAR, ULONG, PUCHAR, ULONG, ULONG, PULONG, PVOID );
   typedef NTSTATUS ( __stdcall *fpRtlGetCompressionWorkSpaceSize )( USHORT, PULONG, PULONG );
+
+  struct ImportEntry
+  {
+    std::forward_list<std::string> functionNames_;
+    std::string dllName_;
+  };
 
   class PEStubWriter
   {
@@ -35,7 +43,6 @@ namespace PE
     HGLOBAL m_hResGlob;
     LPVOID m_pResStub;
     DWORD m_cbResStub;
-
   };
 
 }

@@ -10,9 +10,9 @@ namespace PE
   class PEFile
   {  
   public:
-    PEFile( ULONG_PTR pFileBuff );
-    PEFile(){};
-    virtual ~PEFile(void);
+    PEFile(ULONG_PTR pFileBuff){ Reset(pFileBuff); }
+    PEFile(){}
+    virtual ~PEFile(void){}
     bool IsValidPEFile();
     void Reset( ULONG_PTR pFileBuff ){ m_pFileBuff = pFileBuff; };
 
@@ -27,13 +27,19 @@ namespace PE
     WORD GetNumberOfImportedDlls();  
     DWORD RvaToFileOffset(DWORD rva);
     DWORD FileOffsetToRva(DWORD fileOffset);
-    DWORD AlignDown(DWORD val, DWORD align) const;
-    DWORD AlignUp(DWORD val, DWORD align) const;
 
   protected:
-        PIMAGE_SECTION_HEADER AddSection( const char* szName, ULONG cbSizeOfRawData, ULONG Characteristics );
+    PIMAGE_SECTION_HEADER AddSection( const char* szName, ULONG cbSizeOfRawData, ULONG Characteristics );
     
     ULONG_PTR m_pFileBuff;
   };
 
+  static DWORD AlignDown(DWORD val, DWORD align)
+  {
+    return (val & ~(align - 1));
+  }
+  static DWORD AlignUp(DWORD val, DWORD align)
+  {
+    return ((val & (align - 1)) ? AlignDown(val, align) + align : val);
+  }
 }
