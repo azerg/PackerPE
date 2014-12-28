@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimplePackPE", "SimplePackPE\SimplePackPE.vcxproj", "{446E3B03-F1FD-48DE-8843-83CFC46A0D90}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PELib", "PELib\PELib.vcxproj", "{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Debug|Win32.ActiveCfg = Debug|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Debug|Win32.Build.0 = Debug|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Debug|x64.ActiveCfg = Debug|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Debug|x64.Build.0 = Debug|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Release|Win32.ActiveCfg = Release|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Release|Win32.Build.0 = Release|Win32
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Release|x64.ActiveCfg = Release|x64
+		{446E3B03-F1FD-48DE-8843-83CFC46A0D90}.Release|x64.Build.0 = Release|x64
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Debug|Win32.Build.0 = Debug|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Debug|x64.ActiveCfg = Debug|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Debug|x64.Build.0 = Debug|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Release|Win32.ActiveCfg = Release|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Release|Win32.Build.0 = Release|Win32
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Release|x64.ActiveCfg = Release|x64
+		{8FD49DD9-833F-4E23-82FF-9A1219D85FB8}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
