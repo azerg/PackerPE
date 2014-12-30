@@ -24,11 +24,13 @@ int _tmain(int argc, _TCHAR* argv[])
 {
   auto fileBuff = readFile(argv[0]);
 
-  auto peType = GetExecutableType(fileBuff);
+  auto peType = pelib::GetExecutableType(fileBuff);
 
-  if (peType == PE32)
+  if (peType == pelib::PE32)
   {
-    Executable<PE32> executable(fileBuff.front());
+    pelib::Executable<pelib::PE32> executable(fileBuff);
+
+
   }
 
   return 0;

@@ -11,9 +11,20 @@
 
 #include "executable.h"
 
+using namespace pelib;
+
 //-------------------------------------------------------------------
 std::vector<uint8_t> g_sampleFile;
 //-------------------------------------------------------------------
+
+TEST(PElibTest, entry_point_test)
+{
+  Executable <PE32> testExe(g_sampleFile);
+
+  auto addressOfEntryPoint = testExe.optionalHeader_->AddressOfEntryPoint;
+  EXPECT_EQ(addressOfEntryPoint, 0x6e757220);
+}
+
 
 std::vector<uint8_t> readFile(const _TCHAR* filename)
 {
