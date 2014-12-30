@@ -6,6 +6,7 @@
 
 enum PE_TYPE
 {
+  PE_UNKNOWN,
   PE32,
   PE64 // PE32+
 };
@@ -23,8 +24,6 @@ PE_TYPE GetExecutableType(const intptr_t buffer, size_t size)
 
   ptr += (reinterpret_cast<PIMAGE_DOS_HEADER>(ptr)->e_lfanew) + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER);
 
-  //auto fileHeader = reinterpret_cast<PIMAGE_FILE_HEADER>(ptr + sizeof(IMAGE_NT_SIGNATURE));
-
   PIMAGE_OPTIONAL_HEADER32 head = reinterpret_cast<PIMAGE_OPTIONAL_HEADER32>(ptr);
 
   switch (head->Magic)
@@ -35,7 +34,7 @@ PE_TYPE GetExecutableType(const intptr_t buffer, size_t size)
     return PE64;
   };
 
-  throw std::runtime_error("eek");
+  return PE_UNKNOWN;
 }
 
 template <typename PImageOptionalHeader>
