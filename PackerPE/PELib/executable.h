@@ -15,15 +15,15 @@ namespace pelib
   };
 
   template <typename ContainerType>
-  PE_TYPE GetExecutableType(ContainerType buffer)
+  PE_TYPE GetExecutableType(const ContainerType& buffer)
   {
-    return GetExecutableType(reinterpret_cast<const uintptr_t>(buffer.data()), buffer.size());
+    return GetExecutableType(reinterpret_cast<const char*>(buffer.data()), buffer.size());
   }
 
-  PE_TYPE GetExecutableType(const uintptr_t buffer, size_t size)
+  PE_TYPE GetExecutableType(const char* buffer, size_t size)
   {
     // todo: buffer size checks
-    auto ptr(buffer);
+    char* ptr(const_cast<char*>(buffer));
 
     ptr += (reinterpret_cast<PIMAGE_DOS_HEADER>(ptr)->e_lfanew) + sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER);
 
@@ -45,12 +45,12 @@ namespace pelib
   {
   public:
     explicit ExecutableBase(const std::vector<uint8_t>& fileBuff) :
-      ExecutableBase(reinterpret_cast<uintptr_t>(&fileBuff.front())){}
-    explicit ExecutableBase(const uintptr_t buffer) :
+      ExecutableBase(reinterpret_cast<const char*>(&fileBuff.front())){}
+    explicit ExecutableBase(const char* buffer) :
       buffer_(buffer)
     {
-      uintptr_t curOffset(buffer);
-      dosHeader_ = reinterpret_cast<PIMAGE_DOS_HEADER>(buffer);
+      char* curOffset(const_cast<char*>(buffer));
+      dosHeader_ = reinterpret_cast<PIMAGE_DOS_HEADER>(curOffset);
       curOffset += dosHeader_->e_lfanew + sizeof(IMAGE_NT_SIGNATURE);
 
       fileHeader_ = reinterpret_cast<PIMAGE_FILE_HEADER>(curOffset);
@@ -69,7 +69,7 @@ namespace pelib
     PIMAGE_SECTION_HEADER firstSectionHead_;
 
   private:
-    const uintptr_t buffer_;
+    const char* buffer_;
   };
 
   template <PE_TYPE>
@@ -82,7 +82,7 @@ namespace pelib
   public:
     explicit Executable(const std::vector<uint8_t>& fileBuff) :
       ExecutableBase(fileBuff){}
-    explicit Executable(uintptr_t buffer) :
+    explicit Executable(char* buffer) :
       ExecutableBase(buffer){}
   };
 
@@ -93,7 +93,7 @@ namespace pelib
   public:
     explicit Executable(const std::vector<uint8_t>& fileBuff) :
       ExecutableBase(fileBuff){}
-    explicit Executable(uintptr_t buffer) :
+    explicit Executable(char* buffer) :
       ExecutableBase(buffer){}
   };
 } //namespace pelib

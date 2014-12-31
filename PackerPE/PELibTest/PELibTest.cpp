@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include "executable.h"
+#include "sections_helper.h"
 
 using namespace pelib;
 
@@ -67,7 +68,9 @@ TEST(PElibTest, sections_test)
   Executable<PE32> testExe(g_sampleFile);
 
   auto pSection = testExe.firstSectionHead_;
-  EXPECT_STREQ((char*)&pSection->Name[0], "lala");
+
+  ImageSectionHeader sectionHead((char*)pSection, sizeof(IMAGE_SECTION_HEADER));
+  EXPECT_STREQ(sectionHead.Name().c_str(), ".textbss");
 }
 
 
