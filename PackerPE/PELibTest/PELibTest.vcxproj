@@ -84,9 +84,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="PELibTest.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
