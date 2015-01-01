@@ -3,12 +3,33 @@
 #include <Windows.h>
 #include <cstdint>
 #include <stdexcept>
+#include <algorithm>
+#include <iterator>
+
+#ifndef min
+  #define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
 
 namespace pelib
 {
+#define  SectionGetterAndSetter(memberName) \
+  DWORD memberName() const { return section_data_.##memberName; } \
+  void Set##memberName(DWORD val){ section_data_.##memberName = val; }
+
   class ImageSectionHeader
   {
   public:
+    ImageSectionHeader(ImageSectionHeader& right):
+      section_data_(right.section_data_){}
+    ImageSectionHeader(std::string name):
+      section_data_{}
+    {
+      if (name.length() > IMAGE_SIZEOF_SHORT_NAME)
+      {
+        throw std::runtime_error("Error constructing sectionHeader obj -> name is too long");
+      }
+      SetName(name.c_str(), name.length());
+    }
     ImageSectionHeader(const char* data, size_t maxData)
     {
       if (maxData < sizeof(IMAGE_SECTION_HEADER))
@@ -21,7 +42,8 @@ namespace pelib
 
     std::string Name() const
     {
-      return std::string(section_data_.Name, &section_data_.Name[IMAGE_SIZEOF_SHORT_NAME]);
+      auto nameLen = min(IMAGE_SIZEOF_SHORT_NAME, std::strlen(reinterpret_cast<char*>(const_cast<BYTE*>(&section_data_.Name[0]))));
+      return std::string(section_data_.Name, &section_data_.Name[nameLen]);
     }
 
     void SetName(const char* newName, size_t length)
@@ -32,19 +54,57 @@ namespace pelib
       }
     }
 
-    DWORD VirtualAddress() const { return section_data_.VirtualAddress; }
-    void SetVirtualAddress(DWORD virtualAddress){ section_data_.VirtualAddress = virtualAddress; };
-
-    DWORD SizeOfRawData() const { return section_data_.SizeOfRawData; }
-    void SetSizeOfRawData(DWORD sizeOfRawData){ section_data_.SizeOfRawData = sizeOfRawData; }
-
-    DWORD PointerToRawData() const { return section_data_.PointerToRawData; }
-    void SetPointerToRawData(DWORD pointerToRawData){ section_data_.PointerToRawData = pointerToRawData; }
+    SectionGetterAndSetter(VirtualAddress);
+    SectionGetterAndSetter(SizeOfRawData);
+    SectionGetterAndSetter(PointerToRawData);
 
     char* data(){ return reinterpret_cast<char*>(&section_data_); }
     size_t size() const { return sizeof(IMAGE_SECTION_HEADER); }
-
   private:
     IMAGE_SECTION_HEADER section_data_;
   };
+
+  class SectionsIterator:
+    public std::iterator<std::forward_iterator_tag, ImageSectionHeader>
+  {
+  public:
+    SectionsIterator(SectionsIterator& right):
+      section_(right.section_)
+      , buffer_(right.buffer_){}
+    SectionsIterator(PIMAGE_SECTION_HEADER buffer) :
+      buffer_(buffer)
+      , section_(reinterpret_cast<const char*>(buffer), sizeof(IMAGE_SECTION_HEADER)){}
+
+    SectionsIterator& operator++()
+    {
+      ++buffer_;
+      section_ = ImageSectionHeader(reinterpret_cast<const char*>(buffer_), sizeof(IMAGE_SECTION_HEADER));
+      return *this;
+    }
+
+    bool operator==(const SectionsIterator& right) { return buffer_ == right.buffer_; }
+    bool operator!=(const SectionsIterator& right) { return !operator==(right); }
+    ImageSectionHeader& operator*() { return section_; }
+
+  private:
+    ImageSectionHeader section_;
+    PIMAGE_SECTION_HEADER buffer_;
+  };
+
+  class Sections
+  {
+  public:
+    Sections(){}
+    Sections(PIMAGE_SECTION_HEADER buffer, PIMAGE_FILE_HEADER fileHeader) :
+      fileHeader_(fileHeader)
+      , buffer_(buffer)
+    {}
+    SectionsIterator begin(){ return SectionsIterator(buffer_); };
+    SectionsIterator end(){ return SectionsIterator(buffer_ + fileHeader_->NumberOfSections); };
+
+  private:
+    PIMAGE_FILE_HEADER fileHeader_;
+    PIMAGE_SECTION_HEADER buffer_;
+  };
+
 } // namespace pelib

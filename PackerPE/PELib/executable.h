@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <cstdint>
 #include <stdexcept>
+#include "sections_helper.h"
 #include <vector>
 
 namespace pelib
@@ -59,14 +60,16 @@ namespace pelib
       optionalHeader_ = reinterpret_cast<ImageOptionalHeader*>(curOffset);
       curOffset += sizeof(ImageOptionalHeader);
 
-      firstSectionHead_ = reinterpret_cast<PIMAGE_SECTION_HEADER>(curOffset);
+      auto firstSectionHead_ = reinterpret_cast<PIMAGE_SECTION_HEADER>(curOffset);
       curOffset += sizeof(IMAGE_SECTION_HEADER);
+
+      sections_ = Sections(firstSectionHead_, fileHeader_);
     }
 
     PIMAGE_DOS_HEADER dosHeader_;
     PIMAGE_FILE_HEADER fileHeader_;
     ImageOptionalHeader* optionalHeader_;
-    PIMAGE_SECTION_HEADER firstSectionHead_;
+    Sections sections_;
 
   private:
     const char* buffer_;

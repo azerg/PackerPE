@@ -52,14 +52,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(GTEST_DIR)/include;../PELib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GTEST_DIR)/include;../PELib;$(BOOST_DIR)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>gtestd.lib;PELib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(GTEST_DIR)/msvc/gtest/$(Configuration);$(SolutionDir)\lib\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(GTEST_DIR)/msvc/gtest/$(Configuration);$(BOOST_DIR)/lib;$(SolutionDir)/lib/$(Configuration)/</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -71,7 +71,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(GTEST_DIR)/include;../PELib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GTEST_DIR)/include;../PELib;$(BOOST_DIR)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -80,7 +80,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>gtest.lib;PELib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(GTEST_DIR)/msvc/gtest/$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(GTEST_DIR)/msvc/gtest/$(Configuration);$(BOOST_DIR)/lib;$(SolutionDir)/lib/$(Configuration)/</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

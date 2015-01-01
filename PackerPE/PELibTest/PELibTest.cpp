@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 #include "executable.h"
 #include "sections_helper.h"
@@ -67,10 +68,14 @@ TEST(PElibTest, sections_test)
 {
   Executable<PE32> testExe(g_sampleFile);
 
-  auto pSection = testExe.firstSectionHead_;
+  auto sections = testExe.sections_;
 
-  ImageSectionHeader sectionHead((char*)pSection, sizeof(IMAGE_SECTION_HEADER));
-  EXPECT_STREQ(sectionHead.Name().c_str(), ".textbss");
+  EXPECT_STREQ((*sections.begin()).Name().c_str(), ".textbss");
+
+  std::for_each(sections.begin(), sections.end(), [&](ImageSectionHeader& section)
+  {
+    std::cout << section.Name() << std::endl;
+  });
 }
 
 
