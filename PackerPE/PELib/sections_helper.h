@@ -19,6 +19,8 @@ namespace pelib
   class ImageSectionHeader
   {
   public:
+    ImageSectionHeader(IMAGE_SECTION_HEADER section_data):
+      section_data_(section_data){}
     ImageSectionHeader(ImageSectionHeader& right):
       section_data_(right.section_data_){}
     ImageSectionHeader(std::string name):
@@ -58,8 +60,12 @@ namespace pelib
     SectionGetterAndSetter(SizeOfRawData);
     SectionGetterAndSetter(PointerToRawData);
 
-    char* data(){ return reinterpret_cast<char*>(&section_data_); }
-    size_t size() const { return sizeof(IMAGE_SECTION_HEADER); }
+    bool IsFlagSet(uint16_t flagToCheck) const { return (section_data_.Characteristics & flagToCheck) != 0; }
+    void SetFlag(uint16_t additionalFlag){ section_data_.Characteristics |= additionalFlag; }
+    void RemoveFlag(uint16_t flagToRemove){ section_data_.Characteristics &= ~flagToRemove; }
+
+    char* Data(){ return reinterpret_cast<char*>(&section_data_); }
+    size_t Size() const { return sizeof(IMAGE_SECTION_HEADER); }
   private:
     IMAGE_SECTION_HEADER section_data_;
   };
