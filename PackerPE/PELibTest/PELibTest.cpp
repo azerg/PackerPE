@@ -9,6 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <boost/filesystem/operations.hpp>
 
 #include "executable.h"
 #include "sections_helper.h"
@@ -54,7 +55,7 @@ TEST(PElibTest, entry_point_test)
     Executable<PE32> testExe(g_sampleFile);
 
     auto addressOfEntryPoint = testExe.optionalHeader_->AddressOfEntryPoint;
-    EXPECT_EQ(Hex32(addressOfEntryPoint), Hex32(0x000a79c7));
+    EXPECT_EQ(Hex32(addressOfEntryPoint), Hex32(0x000014e0));
   }
 
   {
@@ -70,16 +71,37 @@ TEST(PElibTest, sections_test)
 
   auto sections = testExe.sections_;
 
-  EXPECT_STREQ((*sections.begin()).Name().c_str(), ".textbss");
+  EXPECT_STREQ((*sections.begin()).Name().c_str(), ".text");
+  EXPECT_EQ(sections.size(), 8);
 
+  int section_counter = 0;
   std::for_each(sections.begin(), sections.end(), [&](ImageSectionHeader& section)
   {
-    std::cout << section.Name() << std::endl;
+    switch (section_counter)
+    {
+    case 1: // .text was checked already
+      EXPECT_STREQ(section.Name().c_str(), ".data");
+      break;
+    case 2:
+      EXPECT_STREQ(section.Name().c_str(), ".rdata");
+      break;
+    case 3:
+      EXPECT_STREQ(section.Name().c_str(), ".bss");
+      break;
+    case 7:
+      EXPECT_STREQ(section.Name().c_str(), ".rsrc");
+      break;
+    default:
+      break;
+    }
+    section_counter++;
   });
+
+  EXPECT_EQ(section_counter, 8);
 }
 
 
-std::vector<uint8_t> readFile(const _TCHAR* filename)
+std::vector<uint8_t> readFile(const char* filename)
 {
   std::streampos fileSize;
   std::ifstream file(filename, std::ios::binary);
@@ -93,13 +115,20 @@ std::vector<uint8_t> readFile(const _TCHAR* filename)
   return fileData;
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+// Sample files are hardcoded to be located at 
+// $(SolutionDir)/SAMPLE_FILES/$(Configuration)
+int _tmain(int argc, char* argv[])
 {
-  if (argc != 3)
-    return -1;
+  auto path = boost::filesystem::current_path().parent_path();
+  path /= "SAMPLE_FILES";
 
-  g_sampleFile = readFile(argv[1]);
-  g_sampleFile64 = readFile(argv[2]);
+  auto x86FilePath = path;
+  x86FilePath /= "x86/fzputtygen.exe";
+  auto x64FilePath = path;
+  x64FilePath /= "x64/notepad.exe";
+
+  g_sampleFile = readFile(x86FilePath.string().c_str());
+  g_sampleFile64 = readFile(x64FilePath.string().c_str());
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
