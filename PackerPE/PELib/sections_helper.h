@@ -96,14 +96,16 @@ namespace pelib
   public:
     Sections(){}
     Sections(PIMAGE_SECTION_HEADER buffer, PIMAGE_FILE_HEADER fileHeader) :
-      fileHeader_(fileHeader)
-      , buffer_(buffer)
+      buffer_(buffer)
+      , numberOfSections_(fileHeader->NumberOfSections)
     {}
     SectionsIterator begin(){ return SectionsIterator(buffer_); };
-    SectionsIterator end(){ return SectionsIterator(buffer_ + fileHeader_->NumberOfSections); };
+    SectionsIterator end(){ return SectionsIterator(buffer_ + numberOfSections_); };
+
+    size_t size() const { return numberOfSections_; }
 
   private:
-    PIMAGE_FILE_HEADER fileHeader_;
+    size_t numberOfSections_;
     PIMAGE_SECTION_HEADER buffer_;
   };
 
