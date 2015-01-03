@@ -9,6 +9,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Header Files\data_directories">
+      <UniqueIdentifier>{c6ab2b7c-9c2d-4486-ae1b-40ae2180a957}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -19,6 +22,9 @@
     </ClInclude>
     <ClInclude Include="sections_helper.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data_directories\import_directory.h">
+      <Filter>Header Files\data_directories</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
