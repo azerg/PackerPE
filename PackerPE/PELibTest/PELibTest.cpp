@@ -70,9 +70,12 @@ TEST(PElibTest, sections_test)
   Executable<PE32> testExe(g_sampleFile);
 
   auto sections = testExe.sections_;
-
-  EXPECT_STREQ((*sections.begin()).Name().c_str(), ".text");
   EXPECT_EQ(sections.size(), 8);
+
+  auto testSection = *sections.begin();
+  EXPECT_STREQ(testSection.Name().c_str(), ".text");
+  EXPECT_TRUE(testSection.IsFlagSet(IMAGE_SCN_CNT_CODE));
+  EXPECT_EQ(testSection.IsFlagSet(IMAGE_SCN_CNT_CODE), testSection.IsExecutable());
 
   int section_counter = 0;
   std::for_each(sections.begin(), sections.end(), [&](ImageSectionHeader& section)
@@ -81,6 +84,7 @@ TEST(PElibTest, sections_test)
     {
     case 1: // .text was checked already
       EXPECT_STREQ(section.Name().c_str(), ".data");
+      EXPECT_FALSE(section.IsFlagSet(IMAGE_SCN_CNT_CODE));
       break;
     case 2:
       EXPECT_STREQ(section.Name().c_str(), ".rdata");

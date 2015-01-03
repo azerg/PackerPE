@@ -61,6 +61,7 @@ namespace pelib
     SectionGetterAndSetter(PointerToRawData);
 
     bool IsFlagSet(uint16_t flagToCheck) const { return (section_data_.Characteristics & flagToCheck) != 0; }
+    bool IsExecutable() const { return IsFlagSet(IMAGE_SCN_CNT_CODE); }
     void SetFlag(uint16_t additionalFlag){ section_data_.Characteristics |= additionalFlag; }
     void RemoveFlag(uint16_t flagToRemove){ section_data_.Characteristics &= ~flagToRemove; }
 

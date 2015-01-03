@@ -41,9 +41,10 @@ namespace pelib
     return PE_UNKNOWN;
   }
 
-  template <typename ImageOptionalHeader>
+  template <typename ImageNtHeadersType>
   class ExecutableBase
   {
+    typedef decltype(ImageNtHeadersType::OptionalHeader) ImageOptionalHeader;
   public:
     explicit ExecutableBase(const std::vector<uint8_t>& fileBuff) :
       ExecutableBase(reinterpret_cast<const char*>(&fileBuff.front())){}
@@ -52,18 +53,15 @@ namespace pelib
     {
       char* curOffset(const_cast<char*>(buffer));
       dosHeader_ = reinterpret_cast<PIMAGE_DOS_HEADER>(curOffset);
-      curOffset += dosHeader_->e_lfanew + sizeof(IMAGE_NT_SIGNATURE);
+      curOffset += dosHeader_->e_lfanew;
 
-      fileHeader_ = reinterpret_cast<PIMAGE_FILE_HEADER>(curOffset);
-      curOffset += sizeof(IMAGE_FILE_HEADER);
+      ImageNtHeadersType* ntHeaders = reinterpret_cast<ImageNtHeadersType*>(curOffset);
+      curOffset += sizeof(ImageNtHeadersType);
 
-      optionalHeader_ = reinterpret_cast<ImageOptionalHeader*>(curOffset);
-      curOffset += sizeof(ImageOptionalHeader);
+      fileHeader_ = &ntHeaders->FileHeader;
+      optionalHeader_ = &ntHeaders->OptionalHeader;
 
-      auto firstSectionHead_ = reinterpret_cast<PIMAGE_SECTION_HEADER>(curOffset);
-      curOffset += sizeof(IMAGE_SECTION_HEADER);
-
-      sections_ = Sections(firstSectionHead_, fileHeader_);
+      sections_ = Sections(reinterpret_cast<PIMAGE_SECTION_HEADER>(curOffset), fileHeader_);
     }
 
     PIMAGE_DOS_HEADER dosHeader_;
@@ -80,7 +78,7 @@ namespace pelib
 
   template <>
   class Executable <PE32> :
-    public ExecutableBase<IMAGE_OPTIONAL_HEADER32>
+    public ExecutableBase<IMAGE_NT_HEADERS>
   {
   public:
     explicit Executable(const std::vector<uint8_t>& fileBuff) :
@@ -91,7 +89,7 @@ namespace pelib
 
   template <>
   class Executable <PE64> :
-    public ExecutableBase<IMAGE_OPTIONAL_HEADER64>
+    public ExecutableBase<IMAGE_NT_HEADERS64>
   {
   public:
     explicit Executable(const std::vector<uint8_t>& fileBuff) :
