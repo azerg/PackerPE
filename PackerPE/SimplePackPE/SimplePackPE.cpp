@@ -1,8 +1,8 @@
 // SimplePackPE.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-#include "executable.h"
+#include <stdio.h>
+#include <tchar.h>
 #include <fstream>
 #include <vector>
 
@@ -22,17 +22,6 @@ std::vector<uint8_t> readFile(const _TCHAR* filename)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-  auto fileBuff = readFile(argv[0]);
-
-  auto peType = pelib::GetExecutableType(fileBuff);
-
-  if (peType == pelib::PE32)
-  {
-    pelib::Executable<pelib::PE32> executable(fileBuff);
-
-
-  }
-
   return 0;
 }
 
