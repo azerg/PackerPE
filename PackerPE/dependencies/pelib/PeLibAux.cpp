@@ -20,7 +20,7 @@
 
 namespace PeLib
 {
-    const qword PELIB_IMAGE_ORDINAL_FLAGS<64>::IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
+  const qword PELIB_IMAGE_ORDINAL_FLAGS<64>::IMAGE_ORDINAL_FLAG = 0x8000000000000000ULL;
   
   bool PELIB_IMAGE_SECTION_HEADER::biggerFileOffset(const PELIB_IMAGE_SECTION_HEADER& ish) const
   {
@@ -38,36 +38,36 @@ namespace PeLib
     return (uiOffset % uiAlignment) ? uiOffset + (uiAlignment - uiOffset % uiAlignment) : uiOffset;
   }
 
-  unsigned int fileSize(const std::string& filename)
+  std::streamoff fileSize(const std::string& filename)
   {
     std::fstream file(filename.c_str());
     file.seekg(0, std::ios::end);
     return file.tellg();
   }
 
-  unsigned int fileSize(std::ifstream& file)
+  std::streamoff fileSize(std::ifstream& file)
   {
-    unsigned int oldpos = file.tellg();
+    auto oldpos = file.tellg();
     file.seekg(0, std::ios::end);
-    unsigned int filesize = file.tellg();
+    auto filesize = file.tellg();
     file.seekg(oldpos, std::ios::beg);
     return filesize;
   }
   
-  unsigned int fileSize(std::fstream& file)
+  std::streamoff fileSize(std::fstream& file)
   {
-    unsigned int oldpos = file.tellg();
+    auto oldpos = file.tellg();
     file.seekg(0, std::ios::end);
-    unsigned int filesize = file.tellg();
+    auto filesize = file.tellg();
     file.seekg(oldpos, std::ios::beg);
     return filesize;
   }
   
-  unsigned int fileSize(std::ofstream& file)
+  std::streamoff fileSize(std::ofstream& file)
   {
-    unsigned int oldpos = file.tellp();
+    auto oldpos = file.tellp();
     file.seekp(0, std::ios::end);
-    unsigned int filesize = file.tellp();
+    auto filesize = file.tellp();
     file.seekp(oldpos, std::ios::beg);
     return filesize;
   }

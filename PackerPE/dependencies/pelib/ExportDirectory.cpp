@@ -78,7 +78,7 @@ namespace PeLib
       return ERROR_OPENING_FILE;
     }
     
-    unsigned int filesize = fileSize(ifFile);
+    auto filesize = fileSize(ifFile);
     
     if (filesize < uiOffset + uiSize)
     {

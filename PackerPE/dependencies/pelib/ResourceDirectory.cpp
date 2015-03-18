@@ -477,7 +477,7 @@ namespace PeLib
       ResourceChild rc;
       inpBuffer >> rc.entry.irde.Name;
       inpBuffer >> rc.entry.irde.OffsetToData;
-      
+
       unsigned int lastPos = inpBuffer.get();
 
       if (rc.entry.irde.Name & PELIB_IMAGE_RESOURCE_NAME_IS_STRING)

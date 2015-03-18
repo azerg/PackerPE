@@ -852,10 +852,10 @@ namespace PeLib
       static unsigned int size(){return 40;}
   };
 
-  unsigned int fileSize(const std::string& filename);
-  unsigned int fileSize(std::ifstream& file);
-  unsigned int fileSize(std::ofstream& file);
-  unsigned int fileSize(std::fstream& file);
+  std::streamoff fileSize(const std::string& filename);
+  std::streamoff fileSize(std::ifstream& file);
+  std::streamoff fileSize(std::ofstream& file);
+  std::streamoff fileSize(std::fstream& file);
   unsigned int alignOffset(unsigned int uiOffset, unsigned int uiAlignment);
   
   /// Determines if a file is a 32bit or 64bit PE file.

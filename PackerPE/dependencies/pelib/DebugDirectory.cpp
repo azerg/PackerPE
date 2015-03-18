@@ -68,7 +68,7 @@ namespace PeLib
   int DebugDirectory::read(const std::string& strFilename, unsigned int uiOffset, unsigned int uiSize)
   {
     std::ifstream ifFile(strFilename.c_str(), std::ios::binary);
-    unsigned int ulFileSize = fileSize(ifFile);
+    auto ulFileSize = fileSize(ifFile);
 
     if (!ifFile)
     {
