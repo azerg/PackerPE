@@ -1,5 +1,5 @@
 SET(simplePackPESrc
-	SimplePackPE.cpp
+  SimplePackPE.cpp
 )
 
 add_executable (SimplePackPE ${simplePackPESrc})

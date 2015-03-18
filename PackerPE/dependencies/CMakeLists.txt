@@ -1,5 +1,5 @@
 # source files for pelib
-SET(pelib_srcs
+SET(pelib_src
   pelib/BoundImportDirectory.cpp
   pelib/ComHeaderDirectory.cpp
   pelib/DebugDirectory.cpp
@@ -15,4 +15,20 @@ SET(pelib_srcs
   pelib/buffer/OutputBuffer.cpp
 )
 
-ADD_LIBRARY(pelib ${pelib_srcs})
+SET(pelib_headers
+  pelib/BoundImportDirectory.h
+  pelib/ComHeaderDirectory.h
+  pelib/DebugDirectory.h
+  pelib/ExportDirectory.h
+  pelib/IatDirectory.h
+  pelib/MzHeader.h
+  pelib/PeFile.h
+  pelib/PeHeader.h
+  pelib/PeLibAux.h
+  pelib/RelocationsDirectory.h
+  pelib/ResourceDirectory.h
+  pelib/buffer/InputBuffer.h
+  pelib/buffer/OutputBuffer.h
+)
+
+ADD_LIBRARY(pelib ${pelib_src} ${pelib_headers})

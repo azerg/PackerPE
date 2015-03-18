@@ -15,38 +15,38 @@
 
 namespace PeLib
 {
-	template<>
-	void PeHeaderT<32>::readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<32>& header) const
-	{
-		ibBuffer >> header.OptionalHeader.BaseOfData;
-	}
-	
-	template<>
-	void PeHeaderT<64>::readBaseOfData(InputBuffer&, PELIB_IMAGE_NT_HEADERS<64>&) const
-	{
-	}
-	
-	template<>
-	void PeHeaderT<32>::rebuildBaseOfData(OutputBuffer& obBuffer) const
-	{
-		obBuffer << m_inthHeader.OptionalHeader.BaseOfData;
-	}
-	
-	template<>
-	void PeHeaderT<64>::rebuildBaseOfData(OutputBuffer&) const
-	{
-	}
-	
+  template<>
+  void PeHeaderT<32>::readBaseOfData(InputBuffer& ibBuffer, PELIB_IMAGE_NT_HEADERS<32>& header) const
+  {
+    ibBuffer >> header.OptionalHeader.BaseOfData;
+  }
+  
+  template<>
+  void PeHeaderT<64>::readBaseOfData(InputBuffer&, PELIB_IMAGE_NT_HEADERS<64>&) const
+  {
+  }
+  
+  template<>
+  void PeHeaderT<32>::rebuildBaseOfData(OutputBuffer& obBuffer) const
+  {
+    obBuffer << m_inthHeader.OptionalHeader.BaseOfData;
+  }
+  
+  template<>
+  void PeHeaderT<64>::rebuildBaseOfData(OutputBuffer&) const
+  {
+  }
+  
     template<>
     bool PeHeaderT<32>::isValid() const
     {
-		return true;
+    return true;
     }
     
     template<>
     bool PeHeaderT<64>::isValid() const
     {
-		return true;
+    return true;
     }
     
     template<>
@@ -70,21 +70,21 @@ namespace PeLib
         return false;
     }
 
-	/**
-	* @return The BaseOfData value from the PE header.
-	**/
-	dword PeHeader32::getBaseOfData() const
-	{
-		return m_inthHeader.OptionalHeader.BaseOfData;
-	}
+  /**
+  * @return The BaseOfData value from the PE header.
+  **/
+  dword PeHeader32::getBaseOfData() const
+  {
+    return m_inthHeader.OptionalHeader.BaseOfData;
+  }
 
-	/**
-	* Changes the file's BaseOfData.
-	* @param dwValue New value.
-	**/
-	void PeHeader32::setBaseOfData(dword dwValue)
-	{
-		m_inthHeader.OptionalHeader.BaseOfData = dwValue;
-	}
+  /**
+  * Changes the file's BaseOfData.
+  * @param dwValue New value.
+  **/
+  void PeHeader32::setBaseOfData(dword dwValue)
+  {
+    m_inthHeader.OptionalHeader.BaseOfData = dwValue;
+  }
 
 }
