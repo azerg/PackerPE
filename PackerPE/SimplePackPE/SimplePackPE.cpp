@@ -5,6 +5,8 @@
 #include <tchar.h>
 #include <fstream>
 #include <vector>
+#include <cstdint>
+#include <boost/program_options.hpp>
 
 std::vector<uint8_t> readFile(const _TCHAR* filename)
 {
