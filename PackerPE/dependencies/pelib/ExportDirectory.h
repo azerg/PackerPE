@@ -67,7 +67,6 @@ namespace PeLib
       /// Change the address of an exported function.
       void setAddressOfFunction(unsigned int index, dword dwValue); // EXPORT
       
-      /*
       word getFunctionOrdinal(std::string strFuncname) const;
       dword getAddressOfName(std::string strFuncname) const;
       dword getAddressOfFunction(std::string strFuncname) const;
@@ -75,7 +74,6 @@ namespace PeLib
       void setFunctionOrdinal(std::string strFuncname, word wValue);
       void setAddressOfName(std::string strFuncname, dword dwValue);
       void setAddressOfFunction(std::string strFuncname, dword dwValue);
-      */
 
       /// Return the Base value of the export directory.
       dword getBase() const; // EXPORT
@@ -100,13 +98,13 @@ namespace PeLib
       /// Returns the AddressOfNameOrdinals value.
       dword getAddressOfNameOrdinals() const; // EXPORT
 
-/*      /// Returns the number of NameOrdinals.
+      /// Returns the number of NameOrdinals.
       dword getNumberOfNameOrdinals() const; // EXPORT
       /// Returns the number of AddressOfFunctionNames values.
       dword getNumberOfAddressOfFunctionNames() const; // EXPORT
       /// Returns the number of AddressOfFunction values.
       dword getNumberOfAddressOfFunctions() const; // EXPORT
-*/
+
       /// Set the Base value of the export directory.
       void setBase(dword dwValue); // EXPORT
       /// Set the Characteristics value of the export directory.

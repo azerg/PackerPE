@@ -582,7 +582,7 @@ namespace PeLib
     return m_ied.ied.AddressOfNames;
   }
 
-/*  dword ExportDirectory::getNumberOfNameOrdinals() const
+  dword ExportDirectory::getNumberOfNameOrdinals() const
   {
     return static_cast<dword>(m_ied.functions.size());
   }
@@ -596,7 +596,7 @@ namespace PeLib
   {
     return static_cast<dword>(m_ied.functions.size());
   }
-*/
+
   /**
   * @return The AddressOfNameOrdinals of the export directory.
   **/

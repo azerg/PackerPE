@@ -148,8 +148,8 @@ void dumpPeHeader(PeLib::PeFile& pef)
 	
 	for (unsigned int i=0;i<peh.getNumberOfRvaAndSizes();i++)
 	{
-		dump(formatOutput(tabnames[i] + " (RVA)", toString(peh.getImageDirectoryRva(i))));
-		dump(formatOutput(tabnames[i] + " (Size)", toString(peh.getImageDirectorySize(i))));
+    dump(formatOutput(tabnames[i] + " (RVA)", toString(peh.getImageDataDirectoryRva(i))));
+    dump(formatOutput(tabnames[i] + " (Size)", toString(peh.getImageDataDirectorySize(i))));
 	}
 	
 	dump("");
@@ -240,7 +240,7 @@ void dumpImportDirectory(PeLib::PeFile& pef)
 		dump(formatOutput("OriginalFirstThunk", toString(imp.getOriginalFirstThunk(i, PeLib::OLDDIR)), "    "));
 		dump(formatOutput("TimeDateStamp", toString(imp.getTimeDateStamp(i, PeLib::OLDDIR)), "    "));
 		dump(formatOutput("ForwarderChain", toString(imp.getForwarderChain(i, PeLib::OLDDIR)), "    "));
-		dump(formatOutput("Name", toString(imp.getName(i, PeLib::OLDDIR)), "    "));
+    dump(formatOutput("Name", toString(imp.getRvaOfName(i, PeLib::OLDDIR)), "    "));
 		dump(formatOutput("FirstThunk", toString(imp.getFirstThunk(i, PeLib::OLDDIR)), "    "));
 		dump("");
 		
@@ -350,12 +350,12 @@ void dumpRelocationsDirectory(PeLib::PeFile* pef)
 	
 	PeLib::RelocationsDirectory& reloc = pef->relocDir();
 	
-	for(unsigned int i=0;i<reloc.getNumberOfRelocations();i++)
+	for(unsigned int i=0;i<reloc.calcNumberOfRelocations();i++)
 	{
 		dump(formatOutput("VirtualAddress", toString(reloc.getVirtualAddress(i))));
 		dump(formatOutput("SizeOfBlock", toString(reloc.getSizeOfBlock(i))));
 		
-		for (unsigned j=0;j<reloc.getNumberOfRelocationData(i);j++)
+		for (unsigned j=0;j<reloc.calcNumberOfRelocationData(i);j++)
 		{
 			dump(formatOutput("RelocationData", toString(reloc.getRelocationData(i,j)), "  "));
 		}
@@ -397,7 +397,7 @@ void dumpTlsDirectory(PeLib::PeFile& pef)
 void dumpBoundImportDirectory(PeLib::PeFile* pef)
 {
 	dump(centerOutput("BoundImport Directory"));
-	
+
 	if (!pef->readBoundImportDirectory())
 	{
 		dump(centerOutput("Not available"));
@@ -406,10 +406,13 @@ void dumpBoundImportDirectory(PeLib::PeFile* pef)
 		dump("");
 		return;
 	}
-	
+  dump(centerOutput("NOT IMPLEMENTED !!!!"));
+  dump("");
+  dump(centerOutput("----------------------------------------------"));
+
 	PeLib::BoundImportDirectory& bimp = pef->boundImpDir();
-	
-	for (unsigned int i=0;i<bimp.getNumberOfModules();i++)
+
+  for (unsigned int i = 0; i<bimp.calcNumberOfModules(); i++)
 	{
 		dump(formatOutput("ModuleName", bimp.getModuleName(i)));
 		dump(formatOutput("TimeDateStamp", toString(bimp.getTimeDateStamp(i))));
@@ -417,6 +420,7 @@ void dumpBoundImportDirectory(PeLib::PeFile* pef)
 		dump(formatOutput("NumberOfModuleForwarderRefs", toString(bimp.getNumberOfModuleForwarderRefs(i))));
 		dump("");
 	}
+
 	
 	dump(centerOutput("----------------------------------------------"));
 	dump("");
@@ -437,7 +441,7 @@ void dumpIatDirectory(PeLib::PeFile* pef)
 	
 	PeLib::IatDirectory& iat = pef->iatDir();
 	
-	for (unsigned int i=0;i<iat.numberOfAddresses();i++)
+  for (unsigned int i = 0; i<iat.calcNumberOfAddresses(); i++)
 	{
 		dump(formatOutput("Address", toString(iat.getAddress(i))));
 	}
