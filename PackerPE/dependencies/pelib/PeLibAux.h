@@ -13,6 +13,7 @@
 #ifndef PELIBAUX_H
 #define PELIBAUX_H
 
+#include <memory>
 //#include "PeLibInc.h"
 //#include "PeHeader.h"
 #include "buffer/OutputBuffer.h"
@@ -862,7 +863,7 @@ namespace PeLib
   unsigned int getFileType(const std::string strFilename);
   
   /// Opens a PE file.
-  PeFile* openPeFile(const std::string& strFilename);
+  std::shared_ptr<PeFile> openPeFile(const std::string& strFilename);
 
   /*  enum MzHeader_Field {e_magic, e_cblp, e_cp, e_crlc, e_cparhdr, e_minalloc, e_maxalloc,
                         e_ss, e_sp, e_csum, e_ip, e_cs, e_lfarlc, e_ovno, e_res, e_oemid,

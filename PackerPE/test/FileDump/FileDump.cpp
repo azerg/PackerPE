@@ -520,7 +520,7 @@ int main(int argc, char* argv[])
 	
 	std::string filename = argv[1];
 	
-	PeLib::PeFile* pef = PeLib::openPeFile(filename);
+	auto pef = PeLib::openPeFile(filename);
 	
 	if (!pef)
 	{
@@ -531,28 +531,26 @@ int main(int argc, char* argv[])
 	pef->readMzHeader();
 	pef->readPeHeader();
 	
-	dumpMzHeader(pef);
+	dumpMzHeader(pef.get());
 	
 	DumpPeHeaderVisitor v1;
 	pef->visit(v1);
 	
-	dumpExportDirectory(pef);
+  dumpExportDirectory(pef.get());
 	
 	DumpImpDirVisitor v2;
 	pef->visit(v2);
 	
-	dumpResourceDirectory(pef);
+  dumpResourceDirectory(pef.get());
 	
-	dumpRelocationsDirectory(pef);
+  dumpRelocationsDirectory(pef.get());
 	
 	DumpTlsDirVisitor v3;
 	pef->visit(v3);
 	
-	dumpBoundImportDirectory(pef);
-	dumpIatDirectory(pef);
-	dumpComHeaderDirectory(pef);
-	
-	delete pef;
+  dumpBoundImportDirectory(pef.get());
+  dumpIatDirectory(pef.get());
+  dumpComHeaderDirectory(pef.get());
 	
 	return 0;
 }

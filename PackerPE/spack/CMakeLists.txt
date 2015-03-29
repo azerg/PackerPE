@@ -1,5 +1,10 @@
 SET(MainProjSrc
-  ${SOLUTION_NAME}.cpp
+	main.cpp
+	${SOLUTION_NAME}.cpp
+)
+
+SET(MainProjInc
+	${SOLUTION_NAME}.h
 )
 
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
@@ -10,6 +15,6 @@ find_package(Boost 1.36.0 REQUIRED program_options)
 
 include_directories(${BOOST_INCLUDEDIR} ${PELIB_ROOT})
 
-add_executable (${SOLUTION_NAME} ${MainProjSrc})
+add_executable(${SOLUTION_NAME} ${MainProjSrc} ${MainProjInc})
 
-target_link_libraries (${SOLUTION_NAME} pelib ${Boost_LIBRARIES})
+target_link_libraries(${SOLUTION_NAME} pelib ${Boost_LIBRARIES})

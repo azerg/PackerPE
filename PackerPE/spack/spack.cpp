@@ -1,89 +1,55 @@
-// SimplePackPE.cpp : Defines the entry point for the console application.
 //
-
-#include <stdio.h>
-#include <tchar.h>
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <cstdint>
-#include <boost/program_options.hpp>
+#include "spack.h"
 #include "PeLib.h"
 
-std::vector<uint8_t> readFile(const _TCHAR* filename)
+typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
+
+void rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName)
 {
-  std::streampos fileSize;
-  std::ifstream file(filename, std::ios::binary);
+  std::vector<PeLib::byte> mzHeadBuffer;
+  peFile->mzHeader().rebuild(mzHeadBuffer);
 
-  file.seekg(0, std::ios::end);
-  fileSize = file.tellg();
-  file.seekg(0, std::ios::beg);
-
-  std::vector<uint8_t> fileData(static_cast<unsigned int>(fileSize));
-  file.read((char*)&fileData[0], fileSize);
-  return fileData;
+  PeLib::MzHeader mzOut;
+  mzOut.read(mzHeadBuffer.data(), mzHeadBuffer.size(), 0);
+  mzOut.write(outFileName, 0);
 }
 
-namespace po = boost::program_options;
-
-struct CmdCtx
+template<int bits>
+void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName)
 {
-  std::string infile;
-  std::string outfile;
-};
-
-typedef decltype(CmdCtx::infile) InifileType;
-typedef decltype(CmdCtx::outfile) OutfileType;
-
-#define IN_FILE_CMD "infile"
-#define OUT_FILE_CMD "outfile"
-
-CmdCtx CmdToContext(po::variables_map&& vm)
-{
-  CmdCtx ctx;
-
-  if (vm.count(IN_FILE_CMD)) {
-    ctx.infile = vm[IN_FILE_CMD].as<InifileType>();
-  }
-
-  if (vm.count(OUT_FILE_CMD)) {
-    ctx.infile = vm[OUT_FILE_CMD].as<OutfileType>();
-  }
-
-  return ctx;
+  const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(pef).peHeader();
+  ..
 }
 
-
-
-int _tmain(int argc, _TCHAR* argv[])
+void PackExecutable(std::string srcFileName, std::string outFileName)
 {
-  po::options_description desc("Allowed options");
-
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("compression", po::value<int>(), "set compression level")
-    (IN_FILE_CMD",i", po::value<InifileType>(), "source file")
-    (OUT_FILE_CMD",o", po::value<OutfileType>(), "output file.If not defined, \"source_name.BAK\" will be used.")
-    ;
-
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
-
-  if (vm.count("help")) {
-    std::cout << desc << "\n";
-    return 1;
-  }
-
-  auto ctx = CmdToContext(std::move(vm));
-
-  auto pef = PeLib::openPeFile(ctx.infile);
+  auto pef = PeLib::openPeFile(srcFileName);
   if (!pef)
   {
     std::cout << "Invalid PE File" << std::endl;
-    return 2;
+    return;
   }
 
-  return 0;
+  pef->readMzHeader();
+  rebuildMZHeader(pef, outFileName);
+
+  pef->readPeHeader();
+  DumpPeHeaderVisitor peVisitor(outFileName);
+  pef->visit(peVisitor);
 }
 
+//------------------------------------------------------------------------
+
+class DumpPeHeaderVisitor: public PeLib::PeFileVisitor
+{
+public:
+  DumpPeHeaderVisitor(std::string outFileName) :
+    outFileName_(outFileName)
+  {}
+  virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file, outFileName_); }
+  virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file, outFileName_); }
+private:
+  std::string outFileName_;
+};
+
+//------------------------------------------------------------------------

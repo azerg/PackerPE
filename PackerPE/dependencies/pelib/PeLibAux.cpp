@@ -244,17 +244,17 @@ namespace PeLib
   * @param strFilename Name of a file.
   * @return Either a PeFile32 object, a PeFil64 object or 0.
   **/
-  PeFile* openPeFile(const std::string& strFilename)
+  std::shared_ptr<PeFile> openPeFile(const std::string& strFilename)
   {
     unsigned int type = getFileType(strFilename);
     
     if (type == PEFILE32)
     {
-      return new PeFile32(strFilename);
+      return std::make_shared<PeFile32>(strFilename);
     }
     else if (type == PEFILE64)
     {
-      return new PeFile64(strFilename);
+      return std::make_shared<PeFile32>(strFilename);
     }
     else
     {
