@@ -10,20 +10,6 @@
 #include <boost/program_options.hpp>
 #include "spack.h"
 
-std::vector<uint8_t> readFile(const _TCHAR* filename)
-{
-  std::streampos fileSize;
-  std::ifstream file(filename, std::ios::binary);
-
-  file.seekg(0, std::ios::end);
-  fileSize = file.tellg();
-  file.seekg(0, std::ios::beg);
-
-  std::vector<uint8_t> fileData(static_cast<unsigned int>(fileSize));
-  file.read((char*)&fileData[0], fileSize);
-  return fileData;
-}
-
 namespace po = boost::program_options;
 
 struct CmdCtx
