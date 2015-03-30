@@ -5,6 +5,7 @@ SET(MainProjSrc
 
 SET(MainProjInc
 	${SOLUTION_NAME}.h
+	tiny_logger.h
 )
 
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
