@@ -25,12 +25,9 @@ std::vector<uint8_t> readFile(const char* filename)
 
 void writeFile(const char* filename, uint64_t offset, const char* pData, uint32_t cbData )
 {
-  ..
-  std::streampos fileSize;
-  std::fstream file(filename, std::ios_base::out | std::ios::binary);
+  std::fstream file(filename, std::fstream::out | std::fstream::binary | std::fstream::in);
   file.seekp(offset, std::ios::beg);
   file.write(pData, cbData);
-  //file.seekp(0, std::ios::beg);
   file.close();
 }
 
