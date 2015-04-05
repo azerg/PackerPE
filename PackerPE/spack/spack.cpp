@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <algorithm>
 #include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
 
@@ -25,13 +27,13 @@ std::vector<uint8_t> readFile(const char* filename)
 
 void writeFile(const char* filename, uint64_t offset, const char* pData, uint32_t cbData )
 {
-  std::fstream file(filename, std::fstream::out | std::fstream::binary | std::fstream::in);
+  std::fstream file(filename, std::fstream::out | std::fstream::binary | std::fstream::in | std::fstream::app);
   file.seekp(offset, std::ios::beg);
   file.write(pData, cbData);
   file.close();
 }
 
-uint32_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff)
+uint64_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
   peFile->mzHeader().rebuild(mzHeadBuffer);
@@ -53,7 +55,7 @@ uint32_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vecto
 }
 
 template<int bits>
-uint32_t rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint32_t offset)
+void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint64_t& offset)
 {
   const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
 
@@ -61,9 +63,51 @@ uint32_t rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint32
   peh.rebuild(peHeaderBuff);
 
   PeLib::PeHeaderT<bits> pehOut;
+  auto cbAfterHeader = peh.size();
   pehOut.read(peHeaderBuff.data(), peHeaderBuff.size(), offset);
   pehOut.write(outFileName, offset);
-  return offset + pehOut.size();
+
+  offset += pehOut.size();
+
+  // append with aligned zero-bytes
+  auto headersSize = peh.getSizeOfHeaders() - offset;
+  if (headersSize)
+  {
+    std::vector<uint8_t> zeroBuff(headersSize);
+    writeFile(outFileName.c_str(), offset, reinterpret_cast<char*>(zeroBuff.data()), headersSize);
+  }
+  offset += headersSize;
+}
+
+template<int bits>
+void rebuildSections(PeLib::PeFile& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff, uint64_t& offset)
+{
+  const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
+  uint32_t cbSections{};
+
+  auto nSections = peh.calcNumberOfSections();
+  for (auto idxSection = 0; idxSection < nSections; idxSection++)
+  {
+    peh.getSectionName(idxSection);
+
+    auto cbSection = peh.getSizeOfRawData(idxSection);
+
+    boost::filesystem::path path(outFileName);
+    path = path.parent_path();
+    path /= peh.getSectionName(idxSection);
+
+    writeFile(
+      outFileName.c_str()
+      , offset
+      , reinterpret_cast<char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
+      , cbSection);
+
+    cbSections += cbSection;
+  }
+
+  peh.writeSections(outFileName);
+
+  offset += cbSections;
 }
 
 //------------------------------------------------------------------------
@@ -71,7 +115,7 @@ uint32_t rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint32
 class DumpPeHeaderVisitor: public PeLib::PeFileVisitor
 {
 public:
-  DumpPeHeaderVisitor(std::string outFileName, uint64_t offset):
+  DumpPeHeaderVisitor(std::string outFileName, uint64_t& offset):
     outFileName_(outFileName)
     , offset_(offset)
   {}
@@ -79,7 +123,23 @@ public:
   virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file, outFileName_, offset_); }
 private:
   std::string outFileName_;
-  uint64_t offset_;
+  uint64_t& offset_;
+};
+
+class DumpSectionsVisitor: public PeLib::PeFileVisitor
+{
+public:
+  DumpSectionsVisitor(std::string outFileName, std::vector<uint8_t>& sourceFileBuff, uint64_t& offset) :
+    outFileName_(outFileName)
+    , offset_(offset)
+    , sourceFileBuff_(sourceFileBuff)
+  {}
+  virtual void callback(PeLib::PeFile32& file) { rebuildSections<32>(file, outFileName_, sourceFileBuff_, offset_); }
+  virtual void callback(PeLib::PeFile64& file) { rebuildSections<64>(file, outFileName_, sourceFileBuff_, offset_); }
+private:
+  std::vector<uint8_t> sourceFileBuff_;
+  std::string outFileName_;
+  uint64_t& offset_;
 };
 
 //------------------------------------------------------------------------
@@ -87,6 +147,11 @@ private:
 void PackExecutable(std::string srcFileName, std::string outFileName)
 {
   auto sourceFileBuff = readFile(srcFileName.c_str());
+
+  if (boost::filesystem::exists(outFileName))
+  {
+    boost::filesystem::remove(outFileName);
+  }
 
   auto pef = PeLib::openPeFile(srcFileName);
   if (!pef)
@@ -98,10 +163,10 @@ void PackExecutable(std::string srcFileName, std::string outFileName)
   pef->readMzHeader();
   auto offset = rebuildMZHeader(pef, outFileName, sourceFileBuff);
 
-  dump(centerOutput("----------------------------------------------"));
-  dump("");
-
   pef->readPeHeader();
   DumpPeHeaderVisitor peVisitor(outFileName, offset);
   pef->visit(peVisitor);
+
+  DumpSectionsVisitor peSectionsVisitor(outFileName, sourceFileBuff, offset);
+  pef->visit(peSectionsVisitor);
 }

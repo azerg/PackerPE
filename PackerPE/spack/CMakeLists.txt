@@ -12,7 +12,7 @@ set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost 1.36.0 REQUIRED program_options)
+find_package(Boost 1.36.0 REQUIRED program_options filesystem system)
 
 include_directories(${BOOST_INCLUDEDIR} ${PELIB_ROOT})
 
