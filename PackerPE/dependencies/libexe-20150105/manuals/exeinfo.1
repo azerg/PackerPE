@@ -1,0 +1,87 @@
+.Dd January 5, 2014
+.Dt exeinfo
+.Os libexe
+.Sh NAME
+.Nm exeinfo
+.Nd determines information about an executable (EXE) file
+.Sh SYNOPSIS
+.Nm exeinfo
+.Op Fl c Ar codepage
+.Op Fl hvV
+.Va Ar source
+.Sh DESCRIPTION
+.Nm exeinfo
+is a utility to determine information about an executable (EXE) file
+.Pp
+.Nm exeinfo
+is part of the
+.Nm libexe
+package.
+.Nm libexe
+is a library to access the executable (EXE) format
+.Pp
+.Ar source
+is the source file.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl c Ar codepage
+specify the codepage of ASCII strings, options: ascii, windows-874, windows-932, windows-936, windows-949, windows-950, windows-1250, windows-1251, windows-1252 (default), windows-1253, windows-1254, windows-1255, windows-1256, windows-1257 or windows-1258
+.It Fl h
+shows this help
+.It Fl v
+verbose output to stderr
+.It Fl V
+print version
+.El
+.Sh ENVIRONMENT
+None
+.Sh FILES
+None
+.Sh EXAMPLES
+.Bd -literal
+# exeinfo WUDFPlatform.dll
+exeinfo 20130303
+
+Executable (EXE) information:
+	Number of sections	: 5
+
+Section: 0
+	Name			: .text
+	Size			: 137216
+	Virtual address		: 0x00001000
+
+Section: 1
+	Name			: .data
+	Size			: 2048
+	Virtual address		: 0x00023000
+
+Section: 2
+	Name			: .pdata
+	Size			: 3584
+	Virtual address		: 0x00024000
+
+Section: 3
+	Name			: .rsrc
+	Size			: 37376
+	Virtual address		: 0x00025000
+
+Section: 4
+	Name			: .reloc
+	Size			: 1536
+	Virtual address		: 0x0002f000
+
+.Ed
+.Sh DIAGNOSTICS
+Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.
+Verbose and debug output are only printed when enabled at compilation.
+.Sh BUGS
+Please report bugs of any kind to <joachim.metz@gmail.com> or on the project website:
+https://github.com/libyal/libexe/
+.Sh AUTHOR
+These man pages were written by Joachim Metz.
+.Sh COPYRIGHT
+Copyright (C) 2011-2015, Joachim Metz <joachim.metz@gmail.com>.
+This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.Sh SEE ALSO
+.Xr exeexport 1

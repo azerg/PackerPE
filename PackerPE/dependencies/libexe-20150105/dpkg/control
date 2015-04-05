@@ -1,0 +1,51 @@
+Source: libexe
+Section: libs
+Priority: extra
+Maintainer: Joachim Metz <joachim.metz@gmail.com>
+Build-Depends: debhelper (>= 7), autotools-dev, python-dev
+Standards-Version: 3.9.5
+Homepage: https://github.com/libyal/libexe/
+
+Package: libexe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libexe-dbg
+Description: Library to access the executable (EXE) format
+ libexe is a library to access the executable (EXE) format.
+
+Package: libexe-dbg
+Architecture: any
+Section: debug
+Depends: libexe (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libexe
+ Debugging symbols for libexe.
+
+Package: libexe-dev
+Section: libdevel
+Architecture: any
+Depends: libexe (= ${binary:Version}), ${misc:Depends}
+Description: Header files and libraries for developing applications for libexe
+ Header files and libraries for developing applications for libexe.
+
+Package: libexe-tools
+Section: utils
+Architecture: any
+Depends: libexe (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Several tools for reading executable (EXE) files
+ Several tools for reading executable (EXE) files.
+
+Package: libexe-python
+Section: python
+Architecture: any
+Depends: libexe (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: libexe-python-dbg
+Description: Python bindings for libexe
+ Python bindings for libexe.
+
+Package: libexe-python-dbg
+Section: debug
+Architecture: any
+Depends: libexe-python (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libexe-python
+ Debugging symbols for libexe-python.
+
