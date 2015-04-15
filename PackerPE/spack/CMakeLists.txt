@@ -1,12 +1,5 @@
-SET(MainProjSrc
-	main.cpp
-	${SOLUTION_NAME}.cpp
-)
-
-SET(MainProjInc
-	${SOLUTION_NAME}.h
-	tiny_logger.h
-)
+file(GLOB MainProjInc "inc/*.*")
+file(GLOB MainProjSrc "src/*.*")
 
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
