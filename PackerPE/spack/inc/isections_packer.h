@@ -5,17 +5,21 @@
 
 #include "expected.hpp"
 #include <memory>
+#include <cstdint>
+#include <vector>
 
 class ISectionsPacker
 {
 public:
-  ISectionsPacker(std::weak_ptr<PeLib::PeFile> peFile):
+  ISectionsPacker(std::shared_ptr<PeLib::PeFile> peFile):
     peFile_(peFile)
   {}
-  virtual ~ISectionsPacker();
+  virtual ~ISectionsPacker(){};
 
-  virtual Expected<ErrorCode> ProcessExecutable(std::weak_ptr<PeLib::PeFile> peFileOut) = 0;
+  virtual Expected<ErrorCode> ProcessExecutable(
+    const std::vector<uint8_t>& sourceFileBuff
+    , std::vector<uint8_t>& outFileBuff) = 0;
 
 protected:
-  std::weak_ptr<PeLib::PeFile> peFile_;
+  std::shared_ptr<PeLib::PeFile> peFile_;
 };

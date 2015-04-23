@@ -1,17 +1,22 @@
 #pragma once
 
+#pragma warning( push )
+#pragma warning( disable : 4018 244 996)
+#include "PeLib.h"
+#pragma warning( pop ) 
+
 #include "isections_packer.h"
 
 class SectionsPacker: ISectionsPacker
 {
 public:
-  SectionsPacker(std::weak_ptr<PeLib::PeFile> peFile):
+  SectionsPacker(std::shared_ptr<PeLib::PeFile> peFile):
     ISectionsPacker(peFile)
   {}
-  virtual ~SectionsPacker();
+  ~SectionsPacker(){};
 
-  Expected<ErrorCode> ProcessExecutable(std::weak_ptr<PeLib::PeFile> peFileOut)
-  {
-    return ErrorCode::ERROR_SUCC;
-  }
+  Expected<ErrorCode> ProcessExecutable(
+    const std::vector<uint8_t>& sourceFileBuff
+    , std::vector<uint8_t>& outFileBuff
+    , std::shared_ptr<PeLib::PeFile> peFileOut);
 };

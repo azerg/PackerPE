@@ -1,6 +1,6 @@
 //
 #include "spack.h"
-#include "PeLib.h"
+#include "sections_packer.h"
 
 #include "tiny_logger.h"
 #include <cstdint>
@@ -57,6 +57,8 @@ uint64_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vecto
 template<int bits>
 void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint64_t& offset)
 {
+  assert(offset > UINT32_MAX);
+
   const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
 
   std::vector<PeLib::byte> peHeaderBuff;
@@ -64,8 +66,8 @@ void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint64_t& 
 
   PeLib::PeHeaderT<bits> pehOut;
   auto cbAfterHeader = peh.size();
-  pehOut.read(peHeaderBuff.data(), peHeaderBuff.size(), offset);
-  pehOut.write(outFileName, offset);
+  pehOut.read(peHeaderBuff.data(), peHeaderBuff.size(), static_cast<uint32_t>(offset));
+  pehOut.write(outFileName, static_cast<uint32_t>(offset));
 
   offset += pehOut.size();
 
@@ -73,41 +75,14 @@ void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint64_t& 
   auto headersSize = peh.getSizeOfHeaders() - offset;
   if (headersSize)
   {
-    std::vector<uint8_t> zeroBuff(headersSize);
-    writeFile(outFileName.c_str(), offset, reinterpret_cast<char*>(zeroBuff.data()), headersSize);
-  }
-  offset += headersSize;
-}
-
-template<int bits>
-void rebuildSections(PeLib::PeFile& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff, uint64_t& offset)
-{
-  const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
-  uint32_t cbSections{};
-
-  auto nSections = peh.calcNumberOfSections();
-  for (auto idxSection = 0; idxSection < nSections; idxSection++)
-  {
-    peh.getSectionName(idxSection);
-
-    auto cbSection = peh.getSizeOfRawData(idxSection);
-
-    boost::filesystem::path path(outFileName);
-    path = path.parent_path();
-    path /= peh.getSectionName(idxSection);
-
+    std::vector<uint8_t> zeroBuff(static_cast<uint32_t>(headersSize));
     writeFile(
       outFileName.c_str()
-      , offset
-      , reinterpret_cast<char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
-      , cbSection);
-
-    cbSections += cbSection;
+      , static_cast<uint32_t>(offset)
+      , reinterpret_cast<char*>(zeroBuff.data())
+      , static_cast<uint32_t>(headersSize));
   }
-
-  peh.writeSections(outFileName);
-
-  offset += cbSections;
+  offset += headersSize;
 }
 
 //------------------------------------------------------------------------
@@ -126,27 +101,12 @@ private:
   uint64_t& offset_;
 };
 
-class DumpSectionsVisitor: public PeLib::PeFileVisitor
-{
-public:
-  DumpSectionsVisitor(std::string outFileName, std::vector<uint8_t>& sourceFileBuff, uint64_t& offset) :
-    outFileName_(outFileName)
-    , offset_(offset)
-    , sourceFileBuff_(sourceFileBuff)
-  {}
-  virtual void callback(PeLib::PeFile32& file) { rebuildSections<32>(file, outFileName_, sourceFileBuff_, offset_); }
-  virtual void callback(PeLib::PeFile64& file) { rebuildSections<64>(file, outFileName_, sourceFileBuff_, offset_); }
-private:
-  std::vector<uint8_t> sourceFileBuff_;
-  std::string outFileName_;
-  uint64_t& offset_;
-};
-
 //------------------------------------------------------------------------
 
 void PackExecutable(std::string srcFileName, std::string outFileName)
 {
   auto sourceFileBuff = readFile(srcFileName.c_str());
+  decltype(sourceFileBuff) outFileBuff;
 
   if (boost::filesystem::exists(outFileName))
   {
@@ -167,6 +127,8 @@ void PackExecutable(std::string srcFileName, std::string outFileName)
   DumpPeHeaderVisitor peVisitor(outFileName, offset);
   pef->visit(peVisitor);
 
-  DumpSectionsVisitor peSectionsVisitor(outFileName, sourceFileBuff, offset);
-  pef->visit(peSectionsVisitor);
+  SectionsPacker sectionsPacker(pef);
+  sectionsPacker.ProcessExecutable(sourceFileBuff, outFileBuff);
+  //DumpSectionsVisitor peSectionsVisitor(outFileName, sourceFileBuff, offset);
+  //pef->visit(peSectionsVisitor);
 }

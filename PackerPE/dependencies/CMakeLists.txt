@@ -31,6 +31,7 @@ SET(pelib_headers
   pelib/buffer/OutputBuffer.h
   pelib/PeLibInc.h
   pelib/TlsDirectory.h
+  pelib/ImportDirectory.h
 )
 
 ADD_LIBRARY(pelib ${pelib_src} ${pelib_headers})

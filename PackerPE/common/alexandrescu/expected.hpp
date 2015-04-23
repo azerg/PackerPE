@@ -9,11 +9,11 @@
 template<class T>
 class Expected
 {
-    union
-    {
+    //union // todo(azerg): uncomment when going to vc2015
+    //{
         T ham;
         std::exception_ptr spam;
-    };
+    //};
 
     bool gotHam;
 
