@@ -2,12 +2,13 @@
 
 #include "sections_packer.h"
 
+#include "file_utils.h"
+
 template<int bits>
 void rebuildSections(
   PeLib::PeFile& peFileSrc
-  , PeLib::PeFile& peFileOut
   , const std::vector<uint8_t>& sourceFileBuff
-  , std::vector<uint8_t>& outFileBuff)
+  , const std::string& outFileName)
 {
   const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFileSrc).peHeader();
   uint32_t cbSections{};
@@ -19,32 +20,26 @@ void rebuildSections(
 
     auto cbSection = peh.getSizeOfRawData(idxSection);
 
-    /*
     writeFile(
       outFileName.c_str()
       , offset
       , reinterpret_cast<char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
       , cbSection);
-    */
 
     cbSections += cbSection;
   }
-
-  //peh.writeSections(outFileName);
-  //offset += cbSections;
 }
 
-Expected<ErrorCode> SectionsPacker::ProcessExecutable(
-  const std::vector<uint8_t>& sourceFileBuff
-  , std::vector<uint8_t>& outFileBuff)
+Expected<ErrorCode> SectionsPacker::ProcessExecutable(std::string& srcFileName, std::string& outFileName)
 {
-  auto peFileOut = 
-  if (!peFileOut)
+  auto peFileOut = PeLib::openPeFile(outFileName);
+  auto peFile = PeLib::openPeFile(srcFileName);
+  if (!peFileOut || !peFile)
   {
-    return Expected<ErrorCode>::fromException(std::runtime_error("peFileOut destroyed..."));
+    return Expected<ErrorCode>::fromException(std::runtime_error("openPEFile failed..."));
   }
 
-  *peFileOut = *peFile_;
+  *peFileOut = *peFile;
 
   return ErrorCode::ERROR_SUCC;
 }
@@ -54,18 +49,19 @@ Expected<ErrorCode> SectionsPacker::ProcessExecutable(
 class DumpSectionsVisitor: public PeLib::PeFileVisitor
 {
 public:
-  DumpSectionsVisitor(
-    const std::vector<uint8_t>& sourceFileBuff
-    , std::vector<uint8_t>& outFileBuff
-    , std::shared_ptr<PeLib::PeFile> peFileOut):
-    outFileBuff_(outFileBuff)
-    , peFileOut_(peFileOut)
-    , sourceFileBuff_(sourceFileBuff)
+  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, const std::string& outFileName) :
+    sourceFileBuff_(sourceFileBuff)
+    , outFileName_(outFileName)
   {}
-  virtual void callback(PeLib::PeFile32& file) { rebuildSections<32>(file, *peFileOut_, sourceFileBuff_, outFileBuff_); }
-  virtual void callback(PeLib::PeFile64& file) { rebuildSections<64>(file, *peFileOut_, sourceFileBuff_, outFileBuff_); }
+  virtual void callback(PeLib::PeFile32& file)
+  {
+    rebuildSections<32>(file, sourceFileBuff_, outFileName_);
+  }
+  virtual void callback(PeLib::PeFile64& file)
+  {
+    rebuildSections<64>(file, sourceFileBuff_, outFileName_);
+  }
 private:
-  const std::vector<uint8_t> sourceFileBuff_;
-  std::vector<uint8_t>& outFileBuff_;
-  std::shared_ptr<PeLib::PeFile> peFileOut_;
+  const std::vector<uint8_t>& sourceFileBuff_;
+  const std::string& outFileName_;
 };

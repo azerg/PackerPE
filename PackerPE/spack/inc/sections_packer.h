@@ -10,13 +10,5 @@
 class SectionsPacker: ISectionsPacker
 {
 public:
-  SectionsPacker(std::shared_ptr<PeLib::PeFile> peFile):
-    ISectionsPacker(peFile)
-  {}
-  ~SectionsPacker(){};
-
-  Expected<ErrorCode> ProcessExecutable(
-    const std::vector<uint8_t>& sourceFileBuff
-    , std::vector<uint8_t>& outFileBuff
-    , std::shared_ptr<PeLib::PeFile> peFileOut);
+  Expected<ErrorCode> ProcessExecutable(std::string& srcFileName, std::string& outFileName);
 };

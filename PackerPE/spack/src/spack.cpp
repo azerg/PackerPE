@@ -1,37 +1,16 @@
 //
 #include "spack.h"
-#include "sections_packer.h"
 
-#include "tiny_logger.h"
 #include <cstdint>
 #include <algorithm>
-#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#include "sections_packer.h"
+#include "file_utils.h"
+#include "tiny_logger.h"
+
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
-
-std::vector<uint8_t> readFile(const char* filename)
-{
-  std::streampos fileSize;
-  std::ifstream file(filename, std::ios::binary);
-
-  file.seekg(0, std::ios::end);
-  fileSize = file.tellg();
-  file.seekg(0, std::ios::beg);
-
-  std::vector<uint8_t> fileData(static_cast<unsigned int>(fileSize));
-  file.read((char*)&fileData[0], fileSize);
-  return fileData;
-}
-
-void writeFile(const char* filename, uint64_t offset, const char* pData, uint32_t cbData )
-{
-  std::fstream file(filename, std::fstream::out | std::fstream::binary | std::fstream::in | std::fstream::app);
-  file.seekp(offset, std::ios::beg);
-  file.write(pData, cbData);
-  file.close();
-}
 
 uint64_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff)
 {
@@ -48,7 +27,7 @@ uint64_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vecto
   auto cbJunkData = std::max(peOffset - cbMZHead, static_cast<uint32_t>(0));
   if (cbJunkData)
   {
-    writeFile(outFileName.c_str(), cbMZHead, reinterpret_cast<char*>(&sourceFileBuff.at(cbMZHead)), cbJunkData);
+    file_utils::writeFile(outFileName.c_str(), cbMZHead, reinterpret_cast<char*>(&sourceFileBuff.at(cbMZHead)), cbJunkData);
   }
 
   return cbMZHead + cbJunkData;
@@ -76,7 +55,7 @@ void rebuildPEHeader(PeLib::PeFile& peFile, std::string& outFileName, uint64_t& 
   if (headersSize)
   {
     std::vector<uint8_t> zeroBuff(static_cast<uint32_t>(headersSize));
-    writeFile(
+    file_utils::writeFile(
       outFileName.c_str()
       , static_cast<uint32_t>(offset)
       , reinterpret_cast<char*>(zeroBuff.data())
@@ -103,9 +82,9 @@ private:
 
 //------------------------------------------------------------------------
 
-void PackExecutable(std::string srcFileName, std::string outFileName)
+void PackExecutable(std::string& srcFileName, std::string& outFileName)
 {
-  auto sourceFileBuff = readFile(srcFileName.c_str());
+  auto sourceFileBuff = file_utils::readFile(srcFileName.c_str());
   decltype(sourceFileBuff) outFileBuff;
 
   if (boost::filesystem::exists(outFileName))
@@ -127,8 +106,6 @@ void PackExecutable(std::string srcFileName, std::string outFileName)
   DumpPeHeaderVisitor peVisitor(outFileName, offset);
   pef->visit(peVisitor);
 
-  SectionsPacker sectionsPacker(pef);
-  sectionsPacker.ProcessExecutable(sourceFileBuff, outFileBuff);
-  //DumpSectionsVisitor peSectionsVisitor(outFileName, sourceFileBuff, offset);
-  //pef->visit(peSectionsVisitor);
+  SectionsPacker sectionsPacker;
+  sectionsPacker.ProcessExecutable(srcFileName, outFileName);
 }

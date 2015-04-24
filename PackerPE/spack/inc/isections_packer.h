@@ -11,15 +11,6 @@
 class ISectionsPacker
 {
 public:
-  ISectionsPacker(std::shared_ptr<PeLib::PeFile> peFile):
-    peFile_(peFile)
-  {}
   virtual ~ISectionsPacker(){};
-
-  virtual Expected<ErrorCode> ProcessExecutable(
-    const std::vector<uint8_t>& sourceFileBuff
-    , std::vector<uint8_t>& outFileBuff) = 0;
-
-protected:
-  std::shared_ptr<PeLib::PeFile> peFile_;
+  virtual Expected<ErrorCode> ProcessExecutable(std::string& srcFileName, std::string& outFileName) = 0;
 };

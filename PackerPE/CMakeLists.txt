@@ -25,4 +25,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
 add_subdirectory (${SOLUTION_NAME})
 add_subdirectory (dependencies)
+add_subdirectory (common)
 add_subdirectory (test/FileDump)

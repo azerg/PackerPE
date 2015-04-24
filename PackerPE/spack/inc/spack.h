@@ -2,4 +2,4 @@
 
 #include <string>
 
-void PackExecutable(std::string srcFileName, std::string outFileName);
+void PackExecutable(std::string& srcFileName, std::string& outFileName);
