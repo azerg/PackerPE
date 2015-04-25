@@ -28,3 +28,4 @@
 *.app
 PackerPE/ipch/
 PackerPE/build/
+PackerPE/build.bat

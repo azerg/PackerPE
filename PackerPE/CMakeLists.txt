@@ -23,7 +23,7 @@ set(PELIB_ROOT ${CMAKE_HOME_DIRECTORY}/dependencies/pelib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
-add_subdirectory (${SOLUTION_NAME})
 add_subdirectory (dependencies)
 add_subdirectory (common)
 add_subdirectory (test/FileDump)
+add_subdirectory (${SOLUTION_NAME})

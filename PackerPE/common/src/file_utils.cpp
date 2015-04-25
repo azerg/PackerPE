@@ -25,4 +25,13 @@ namespace file_utils
     file.write(pData, cbData);
     file.close();
   }
+
+  void appendToFile(const char* filename, const char* pData, uint32_t cbData)
+  {
+    std::fstream file(filename);
+    file.seekg(0, std::ios::end);
+    auto len = file.tellg();
+    file.close();
+    writeFile(filename, len, pData, cbData);
+  }
 } // namespace file_utils

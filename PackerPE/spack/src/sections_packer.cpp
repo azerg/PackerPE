@@ -20,36 +20,19 @@ void rebuildSections(
 
     auto cbSection = peh.getSizeOfRawData(idxSection);
 
-    writeFile(
+    file_utils::appendToFile(
       outFileName.c_str()
-      , offset
-      , reinterpret_cast<char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
+      , reinterpret_cast<const char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
       , cbSection);
 
     cbSections += cbSection;
   }
 }
 
-Expected<ErrorCode> SectionsPacker::ProcessExecutable(std::string& srcFileName, std::string& outFileName)
-{
-  auto peFileOut = PeLib::openPeFile(outFileName);
-  auto peFile = PeLib::openPeFile(srcFileName);
-  if (!peFileOut || !peFile)
-  {
-    return Expected<ErrorCode>::fromException(std::runtime_error("openPEFile failed..."));
-  }
-
-  *peFileOut = *peFile;
-
-  return ErrorCode::ERROR_SUCC;
-}
-
-//---------------------------------------------------------------------------------------------------
-
 class DumpSectionsVisitor: public PeLib::PeFileVisitor
 {
 public:
-  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, const std::string& outFileName) :
+  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, const std::string& outFileName):
     sourceFileBuff_(sourceFileBuff)
     , outFileName_(outFileName)
   {}
@@ -65,3 +48,19 @@ private:
   const std::vector<uint8_t>& sourceFileBuff_;
   const std::string& outFileName_;
 };
+
+//---------------------------------------------------------------------------------------------------
+
+Expected<ErrorCode> SectionsPacker::ProcessExecutable(std::string& srcFileName, std::string& outFileName)
+{
+  auto peFileOut = PeLib::openPeFile(outFileName);
+  auto peFile = PeLib::openPeFile(srcFileName);
+  if (!peFileOut || !peFile)
+  {
+    return Expected<ErrorCode>::fromException(std::runtime_error("openPEFile failed..."));
+  }
+
+  *peFileOut = *peFile;
+
+  return ErrorCode::ERROR_SUCC;
+}
