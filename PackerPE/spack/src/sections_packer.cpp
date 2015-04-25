@@ -51,16 +51,23 @@ private:
 
 //---------------------------------------------------------------------------------------------------
 
-Expected<ErrorCode> SectionsPacker::ProcessExecutable(std::string& srcFileName, std::string& outFileName)
+Expected<ErrorCode> SectionsPacker::ProcessExecutable(const std::string& outFileName)
 {
   auto peFileOut = PeLib::openPeFile(outFileName);
-  auto peFile = PeLib::openPeFile(srcFileName);
-  if (!peFileOut || !peFile)
+  if (!peFileOut)
   {
     return Expected<ErrorCode>::fromException(std::runtime_error("openPEFile failed..."));
   }
 
-  *peFileOut = *peFile;
+  auto sourceFileBuff = file_utils::readFile(srcPEFile_->getFileName());
 
+  DumpSectionsVisitor sectionsVisitor(sourceFileBuff, outFileName);
+  srcPEFile_->visit(sectionsVisitor);
+
+  return ErrorCode::ERROR_SUCC;
+}
+
+Expected<ErrorCode> SectionsPacker::IsReady() const
+{
   return ErrorCode::ERROR_SUCC;
 }

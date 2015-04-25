@@ -10,5 +10,11 @@
 class SectionsPacker: ISectionsPacker
 {
 public:
-  Expected<ErrorCode> ProcessExecutable(std::string& srcFileName, std::string& outFileName);
+  SectionsPacker(const std::string& srcFileName):
+    ISectionsPacker(srcFileName)
+  {}
+  virtual Expected<ErrorCode> ProcessExecutable(const std::string& outFileName);
+  virtual Expected<ErrorCode> IsReady() const;
+private:
+  uint32_t GetSectionsOffset() const;
 };
