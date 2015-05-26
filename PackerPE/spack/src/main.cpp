@@ -33,7 +33,7 @@ CmdCtx CmdToContext(po::variables_map&& vm)
   }
 
   if (vm.count(OUT_FILE_CMD)) {
-    ctx.infile = vm[OUT_FILE_CMD].as<OutfileType>();
+    ctx.outfile = vm[OUT_FILE_CMD].as<OutfileType>();
   }
 
   return ctx;

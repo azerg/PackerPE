@@ -107,7 +107,8 @@ void PackExecutable(std::string& srcFileName, std::string& outFileName)
     pef->visit(peVisitor);
 
     SectionsPacker sectionsPacker(srcFileName);
-    sectionsPacker.ProcessExecutable(outFileName);
+    auto err = sectionsPacker.ProcessExecutable(outFileName);
+
   }
   catch (std::runtime_error& err)
   {
