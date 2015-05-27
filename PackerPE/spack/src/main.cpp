@@ -67,6 +67,12 @@ int _tmain(int argc, _TCHAR* argv[])
   }
 
   auto ctx = CmdToContext(std::move(vm));
+  if (ctx.infile.empty())
+  {
+    std::cout << "Invalid Arguments\n" << "Use -i \"Filepath\"";
+    return -1;
+  }
+
   if (ctx.outfile.empty())
   {
     ctx.outfile = GenerateOutputFilename(ctx.infile);
