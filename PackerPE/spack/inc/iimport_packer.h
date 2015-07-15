@@ -6,24 +6,15 @@
 #include "expected.hpp"
 #include <memory>
 #include <cstdint>
-#include <list>
 
-struct Section
-{
-  PeLib::PELIB_IMAGE_SECTION_HEADER header;
-  std::vector<uint8_t> data;
-};
-
-typedef std::list<Section> SectionsArr;
-
-class ISectionsPacker
+class IImportPacker
 {
 public:
-  ISectionsPacker(std::shared_ptr<PeLib::PeFile> srcFileName):
-    srcPEFile(srcPEFile_)
+  IImportPacker(std::shared_ptr<PeLib::PeFile> srcPEFile):
+    srcPEFile_(srcPEFile)
   {}
-  virtual ~ISectionsPacker(){};
-  virtual SectionsArr ProcessExecutable() = 0;
+  virtual ~IImportPacker(){};
+  virtual Expected<ErrorCode> ProcessExecutable(const std::string& outFileName) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.

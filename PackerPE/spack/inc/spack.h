@@ -1,5 +1,6 @@
 #pragma once
 
 #include <string>
+#include "error_defines.h"
 
-void PackExecutable(std::string& srcFileName, std::string& outFileName);
+ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outFileName);

@@ -12,7 +12,7 @@
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
 
-uint32_t rebuildMZHeader(PeFilePtr& peFile, std::string& outFileName, std::vector<uint8_t>& sourceFileBuff)
+uint32_t rebuildMZHeader(PeFilePtr& peFile, const std::string& outFileName, std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
   peFile->mzHeader().rebuild(mzHeadBuffer);
@@ -80,7 +80,7 @@ private:
 
 //------------------------------------------------------------------------
 
-void PackExecutable(std::string& srcFileName, std::string& outFileName)
+ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outFileName)
 {
   try
   {
@@ -96,7 +96,7 @@ void PackExecutable(std::string& srcFileName, std::string& outFileName)
     if (!pef)
     {
       std::cout << "Invalid PE File" << std::endl;
-      return;
+      return ErrorCode::INVALID_PE_FILE;
     }
 
     pef->readMzHeader();
@@ -108,10 +108,12 @@ void PackExecutable(std::string& srcFileName, std::string& outFileName)
 
     SectionsPacker sectionsPacker(srcFileName);
     auto err = sectionsPacker.ProcessExecutable(outFileName);
-
+    return err.get();
   }
   catch (std::runtime_error& err)
   {
     std::cout << err.what();
   }
+
+  return ErrorCode::FATAL_ERROR;
 }

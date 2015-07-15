@@ -27,5 +27,6 @@
 *.out
 *.app
 PackerPE/ipch/
+PackerPE/bin/
 PackerPE/build/
 PackerPE/build.bat

@@ -8,7 +8,7 @@ template<int bits>
 void rebuildSections(
   PeLib::PeFile& peFileSrc
   , const std::vector<uint8_t>& sourceFileBuff
-  , const std::string& outFileName)
+  , SectionsArr& sectionsOut)
 {
   const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFileSrc).peHeader();
   uint32_t cbSections{};
@@ -16,14 +16,16 @@ void rebuildSections(
   auto nSections = peh.calcNumberOfSections();
   for (auto idxSection = 0; idxSection < nSections; idxSection++)
   {
-    peh.getSectionName(idxSection);
+    peh.readSections
 
     auto cbSection = peh.getSizeOfRawData(idxSection);
 
+    /*
     file_utils::appendToFile(
       outFileName.c_str()
       , reinterpret_cast<const char*>(&sourceFileBuff.at(peh.getPointerToRawData(idxSection)))
       , cbSection);
+    */
 
     cbSections += cbSection;
   }
@@ -32,9 +34,9 @@ void rebuildSections(
 class DumpSectionsVisitor: public PeLib::PeFileVisitor
 {
 public:
-  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, const std::string& outFileName):
+  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, SectionsArr& sectionsOut) :
     sourceFileBuff_(sourceFileBuff)
-    , outFileName_(outFileName)
+    , sectionsOut_(sectionsOut)
   {}
   virtual void callback(PeLib::PeFile32& file)
   {
@@ -46,12 +48,12 @@ public:
   }
 private:
   const std::vector<uint8_t>& sourceFileBuff_;
-  const std::string& outFileName_;
+  SectionsArr& sectionsOut_;
 };
 
 //---------------------------------------------------------------------------------------------------
 
-Expected<ErrorCode> SectionsPacker::ProcessExecutable(const std::string& outFileName)
+SectionsArr SectionsPacker::ProcessExecutable()
 {
   auto peFileOut = PeLib::openPeFile(outFileName);
   if (!peFileOut)
