@@ -10,10 +10,10 @@
 class SectionsPacker: ISectionsPacker
 {
 public:
-  SectionsPacker(const std::string& srcFileName):
-    ISectionsPacker(srcFileName)
+  SectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
+    ISectionsPacker(srcPEFile)
   {}
-  virtual Expected<ErrorCode> ProcessExecutable(const std::string& outFileName);
+  virtual SectionsArr ProcessExecutable(uint32_t dataOffset);
   virtual Expected<ErrorCode> IsReady() const;
 private:
   uint32_t GetSectionsOffset() const;

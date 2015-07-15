@@ -8,7 +8,8 @@ template<int bits>
 void rebuildSections(
   PeLib::PeFile& peFileSrc
   , const std::vector<uint8_t>& sourceFileBuff
-  , SectionsArr& sectionsOut)
+  , SectionsArr& sectionsOut
+  , uint32_t& offsetInOut)
 {
   const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFileSrc).peHeader();
   uint32_t cbSections{};
@@ -16,7 +17,7 @@ void rebuildSections(
   auto nSections = peh.calcNumberOfSections();
   for (auto idxSection = 0; idxSection < nSections; idxSection++)
   {
-    peh.readSections
+    //peh.readSections
 
     auto cbSection = peh.getSizeOfRawData(idxSection);
 
@@ -34,39 +35,35 @@ void rebuildSections(
 class DumpSectionsVisitor: public PeLib::PeFileVisitor
 {
 public:
-  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, SectionsArr& sectionsOut) :
+  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, SectionsArr& sectionsOut, uint32_t dataOffset):
     sourceFileBuff_(sourceFileBuff)
     , sectionsOut_(sectionsOut)
+    , dataOffset_(dataOffset)
   {}
   virtual void callback(PeLib::PeFile32& file)
   {
-    rebuildSections<32>(file, sourceFileBuff_, outFileName_);
+    rebuildSections<32>(file, sourceFileBuff_, sectionsOut_, dataOffset_);
   }
   virtual void callback(PeLib::PeFile64& file)
   {
-    rebuildSections<64>(file, sourceFileBuff_, outFileName_);
+    rebuildSections<64>(file, sourceFileBuff_, sectionsOut_, dataOffset_);
   }
 private:
   const std::vector<uint8_t>& sourceFileBuff_;
   SectionsArr& sectionsOut_;
+  uint32_t dataOffset_;
 };
 
-//---------------------------------------------------------------------------------------------------
-
-SectionsArr SectionsPacker::ProcessExecutable()
+SectionsArr SectionsPacker::ProcessExecutable(uint32_t dataOffset)
 {
-  auto peFileOut = PeLib::openPeFile(outFileName);
-  if (!peFileOut)
-  {
-    return Expected<ErrorCode>::fromException(std::runtime_error("openPEFile failed..."));
-  }
-
   auto sourceFileBuff = file_utils::readFile(srcPEFile_->getFileName());
 
-  DumpSectionsVisitor sectionsVisitor(sourceFileBuff, outFileName);
+  SectionsArr newSections;
+
+  DumpSectionsVisitor sectionsVisitor(sourceFileBuff, newSections, dataOffset);
   srcPEFile_->visit(sectionsVisitor);
 
-  return ErrorCode::ERROR_SUCC;
+  return newSections;
 }
 
 Expected<ErrorCode> SectionsPacker::IsReady() const

@@ -10,7 +10,8 @@
 
 struct Section
 {
-  PeLib::PELIB_IMAGE_SECTION_HEADER header;
+  PeLib::PELIB_IMAGE_SECTION_HEADER new_header;
+  PeLib::PELIB_IMAGE_SECTION_HEADER original_header;
   std::vector<uint8_t> data;
 };
 
@@ -19,11 +20,11 @@ typedef std::list<Section> SectionsArr;
 class ISectionsPacker
 {
 public:
-  ISectionsPacker(std::shared_ptr<PeLib::PeFile> srcFileName):
-    srcPEFile(srcPEFile_)
+  ISectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
+    srcPEFile_(srcPEFile)
   {}
   virtual ~ISectionsPacker(){};
-  virtual SectionsArr ProcessExecutable() = 0;
+  virtual SectionsArr ProcessExecutable(uint32_t dataOffset) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.
