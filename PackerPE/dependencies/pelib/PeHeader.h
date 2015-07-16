@@ -284,6 +284,8 @@ namespace PeLib
       dword getVirtualSize(word uiSectionnr) const; // EXPORT
       /// Returns the virtual address of a section.
       dword getVirtualAddress(word uiSectionnr) const; // EXPORT
+      /// Returns PELIB_IMAGE_SECTION_HEADER of the section.
+      PELIB_IMAGE_SECTION_HEADER getSectionHeader(word wSectionnr) const; // EXPORT
       /// Returns the size of a section's raw data.
       dword getSizeOfRawData(word uiSectionnr) const; // EXPORT
       /// Returns file offset of the data of a section.
@@ -1938,6 +1940,17 @@ namespace PeLib
   dword PeHeaderT<x>::getVirtualAddress(word wSectionnr) const
   {
     return m_vIsh[wSectionnr].VirtualAddress;
+  }
+
+  /**
+  * Returns PELIB_IMAGE_SECTION_HEADER of the section which is specified by the parameter wSectionnr.
+  * @param wSectionnr Index of the section.
+  * @return PELIB_IMAGE_SECTION_HEADER of the section.
+  **/
+  template <int x>
+  PELIB_IMAGE_SECTION_HEADER PeHeaderT<x>::getSectionHeader(word wSectionnr) const
+  {
+    return m_vIsh[wSectionnr];
   }
   
   /**
