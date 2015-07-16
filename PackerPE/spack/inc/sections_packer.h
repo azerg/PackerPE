@@ -13,7 +13,7 @@ public:
   SectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
     ISectionsPacker(srcPEFile)
   {}
-  virtual SectionsArr ProcessExecutable(uint32_t dataOffset);
+  virtual SectionsArr ProcessExecutable();
   virtual Expected<ErrorCode> IsReady() const;
 private:
   uint32_t GetSectionsOffset() const;

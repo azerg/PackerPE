@@ -107,7 +107,9 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     pef->visit(peVisitor);
 
     SectionsPacker sectionsPacker(pef);
-    auto err = sectionsPacker.ProcessExecutable(offset);
+    auto err = sectionsPacker.ProcessExecutable();
+
+    return ErrorCode::ERROR_SUCC;
   }
   catch (std::runtime_error& err)
   {

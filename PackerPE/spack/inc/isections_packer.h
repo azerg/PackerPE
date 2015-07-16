@@ -24,7 +24,7 @@ public:
     srcPEFile_(srcPEFile)
   {}
   virtual ~ISectionsPacker(){};
-  virtual SectionsArr ProcessExecutable(uint32_t dataOffset) = 0;
+  virtual SectionsArr ProcessExecutable() = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.
