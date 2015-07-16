@@ -769,7 +769,6 @@ namespace PeLib
     /// All first thunk value of an imported DLL.
     std::vector<PELIB_THUNK_DATA<bits> > firstthunk;
     
-//    bool operator==(std::string strFilename) const;
     inline unsigned int size() const
     {
       return PELIB_IMAGE_IMPORT_DESCRIPTOR::size() + name.size() + 1 + // descriptor + dllname
