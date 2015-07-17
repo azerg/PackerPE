@@ -14,6 +14,23 @@ void dumpImportDirectory(PeLib::PeFile& pef, const std::vector<uint8_t>& sourceF
 
   const PeLib::ImportDirectory<bits>& imp = static_cast<PeLib::PeFileT<bits>&>(pef).impDir();
 
+  auto ceImportedDLLs = imp.getNumberOfFiles(PeLib::OLDDIR);
+  importOut.reserve(ceImportedDLLs * PeLib::PELIB_IMAGE_IMPORT_DESCRIPTOR::size());
+
+  std::vector<PeLib::byte> importsBuff;
+  imp.rebuild(importsBuff, 0);
+
+  for (unsigned int i = 0; i < imp.getNumberOfFiles(PeLib::OLDDIR); i++)
+  {
+    PeLib::PELIB_IMAGE_IMPORT_DESCRIPTOR oldImportDLLEntry;
+    /*
+    oldImportDLLEntry.FirstThunk = imp.getFirstThunk(i, PeLib::OLDDIR);
+    oldImportDLLEntry.ForwarderChain = imp.getForwarderChain(i, PeLib::OLDDIR);
+    oldImportDLLEntry.Name = imp.getFileName(i, PeLib::OLDDIR);
+    oldImportDLLEntry.OriginalFirstThunk = imp.getOriginalFirstThunk(i, PeLib::OLDDIR);
+    oldImportDLLEntry.TimeDateStamp = */
+  }
+
   /*
   for (unsigned int i = 0; i<imp.getNumberOfFiles(PeLib::OLDDIR); i++)
   {
@@ -39,10 +56,10 @@ void dumpImportDirectory(PeLib::PeFile& pef, const std::vector<uint8_t>& sourceF
   */
 }
 
-class DumpSectionsVisitor : public PeLib::PeFileVisitor
+class DumpImportsVisitor : public PeLib::PeFileVisitor
 {
 public:
-  DumpSectionsVisitor(const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut) :
+  DumpImportsVisitor(const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut) :
     sourceFileBuff_(sourceFileBuff)
     , importOut_(importOut)
   {}
@@ -61,5 +78,12 @@ private:
 
 ImportsArr ImportPacker::ProcessExecutable()
 {
-  return ImportsArr();
+  auto sourceFileBuff = file_utils::readFile(srcPEFile_->getFileName());
+
+  ImportsArr importsData;
+
+  DumpImportsVisitor importsVisitor(sourceFileBuff, importsData);
+  srcPEFile_->visit(importsVisitor);
+
+  return importsData;
 }
