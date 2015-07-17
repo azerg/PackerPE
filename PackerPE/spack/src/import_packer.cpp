@@ -5,7 +5,7 @@
 #include "file_utils.h"
 
 template<int bits>
-void dumpImportDirectory(PeLib::PeFile& pef)
+void dumpImportDirectory(PeLib::PeFile& pef, const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut)
 {
   if (!pef.readImportDirectory())
   {

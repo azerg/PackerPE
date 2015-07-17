@@ -7,13 +7,6 @@
 
 #include "iimport_packer.h"
 
-struct ImportEntry
-{
-  //PELIB_IMAGE_IMPORT_DIRECTORY
-};
-
-typedef std::vector<int> ImportsArr;
-
 class ImportPacker : IImportPacker
 {
 public:

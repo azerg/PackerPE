@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include "sections_packer.h"
+#include "import_packer.h"
 #include "file_utils.h"
 #include "tiny_logger.h"
 
@@ -110,7 +111,10 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     pef->visit(peVisitor);
 
     SectionsPacker sectionsPacker(pef);
-    auto err = sectionsPacker.ProcessExecutable();
+    auto sectionsArr = sectionsPacker.ProcessExecutable();
+
+    ImportPacker importPacker(pef);
+    auto importsArr = importPacker.ProcessExecutable();
 
     return ErrorCode::ERROR_SUCC;
   }
