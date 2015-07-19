@@ -1,21 +1,20 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <cstdint>
-
+#include "includes.h"
 #include "expected.hpp"
 
-#include "PeLib.h"
 #include "error_defines.h"
 
-template <int bits>
 struct ImportEntry
 {
-  PeLib::PELIB_IMAGE_IMPORT_DIRECTORY<bits> old_imports;
-  PeLib::PELIB_IMAGE_IMPORT_DIRECTORY<bits> new_imports;
+  std::vector<PeLib::byte> old_imports;
+  std::vector<PeLib::byte> new_imports;
 };
 
-typedef std::vector<ImportEntry<64>> ImportsArr;
+typedef ImportEntry ImportsArr;
 
 class IImportPacker
 {
@@ -24,7 +23,7 @@ public:
     srcPEFile_(srcPEFile)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable() = 0;
+  virtual ImportsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.

@@ -1,10 +1,6 @@
 #pragma once
 
-#pragma warning( push )
-#pragma warning( disable : 4018 244 996)
-#include "PeLib.h"
-#pragma warning( pop ) 
-
+#include "includes.h"
 #include "iimport_packer.h"
 
 class ImportPacker : IImportPacker
@@ -13,7 +9,7 @@ public:
   ImportPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile) :
     IImportPacker(srcPEFile)
   {}
-  virtual ImportsArr ProcessExecutable();
+  virtual ImportsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff);
   virtual Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
 private:
   uint32_t GetSectionsOffset() const;

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "PeLib.h"
-#include "error_defines.h"
-
-#include "expected.hpp"
 #include <memory>
 #include <cstdint>
 #include <list>
+#include "expected.hpp"
+#include "includes.h"
+#include "error_defines.h"
 
 struct Section
 {
@@ -24,7 +23,7 @@ public:
     srcPEFile_(srcPEFile)
   {}
   virtual ~ISectionsPacker(){};
-  virtual SectionsArr ProcessExecutable() = 0;
+  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.

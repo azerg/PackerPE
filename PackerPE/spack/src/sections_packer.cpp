@@ -1,8 +1,5 @@
-#pragma once
-
+//
 #include "sections_packer.h"
-
-#include "file_utils.h"
 
 template<int bits>
 void rebuildSections(
@@ -53,10 +50,8 @@ private:
   SectionsArr& sectionsOut_;
 };
 
-SectionsArr SectionsPacker::ProcessExecutable()
+SectionsArr SectionsPacker::ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff)
 {
-  auto sourceFileBuff = file_utils::readFile(srcPEFile_->getFileName());
-
   SectionsArr newSections;
 
   DumpSectionsVisitor sectionsVisitor(sourceFileBuff, newSections);

@@ -1,10 +1,6 @@
 #pragma once
 
-#pragma warning( push )
-#pragma warning( disable : 4018 244 996)
-#include "PeLib.h"
-#pragma warning( pop ) 
-
+#include "includes.h"
 #include "isections_packer.h"
 
 class SectionsPacker: ISectionsPacker
@@ -13,7 +9,7 @@ public:
   SectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
     ISectionsPacker(srcPEFile)
   {}
-  virtual SectionsArr ProcessExecutable();
+  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff);
   virtual Expected<ErrorCode> IsReady() const;
 private:
   uint32_t GetSectionsOffset() const;
