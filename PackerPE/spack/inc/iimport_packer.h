@@ -23,7 +23,7 @@ public:
     srcPEFile_(srcPEFile)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff) = 0;
+  virtual ImportsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, PeLib::dword importTableRVA) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.

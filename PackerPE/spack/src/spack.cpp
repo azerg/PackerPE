@@ -43,8 +43,6 @@ void rebuildPEHeader(PeLib::PeFile& peFile, std::vector<uint8_t>& outFileBuffer,
 
   PeLib::PeHeaderT<bits> pehOut;
   auto cbAfterHeader = peh.size();
-  //pehOut.read(peHeaderBuff.data(), peHeaderBuff.size(), offset);
-  //pehOut.write(outFileName, offset);
   std::copy(peHeaderBuff.cbegin(), peHeaderBuff.cend(), std::back_inserter(outFileBuffer));
 
   offset += pehOut.size();
@@ -106,15 +104,23 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     pef->readMzHeader();
     auto offset = rebuildMZHeader(pef, outFileBuffer, sourceFileBuff);
 
+    //-----------------------------------------------------
+
     pef->readPeHeader();
     DumpPeHeaderVisitor peVisitor(outFileBuffer, offset);
     pef->visit(peVisitor);
 
-    SectionsPacker sectionsPacker(pef);
-    auto sectionsArr = sectionsPacker.ProcessExecutable();
+    //-----------------------------------------------------
 
-    ImportPacker importPacker(pef);
-    auto importsArr = importPacker.ProcessExecutable();
+    SectionsPacker sectionsPacker(pef);
+    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff);
+
+    //-----------------------------------------------------
+
+    ImportPacker importPacker(pef); // new import RVA passed here
+    auto importsArr = importPacker.ProcessExecutable(sourceFileBuff, 0);
+
+    //-----------------------------------------------------
 
     return ErrorCode::ERROR_SUCC;
   }

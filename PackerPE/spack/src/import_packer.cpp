@@ -13,46 +13,52 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports()
 }
 
 template<int bits>
-void dumpImportDirectory(PeLib::PeFile& pef, const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut)
+void dumpImportDirectory(
+  PeLib::PeFile& peFile
+  , const std::vector<uint8_t>& sourceFileBuff
+  , ImportsArr& importOut
+  , PeLib::dword newImportTableRVA)
 {
-  if (pef.readImportDirectory() != PeLib::NO_ERROR)
+  if (peFile.readImportDirectory() != PeLib::NO_ERROR)
   {
     return;
   }
 
-  auto& imp = static_cast<PeLib::PeFileT<bits>&>(pef).impDir();
+  auto& imp = static_cast<PeLib::PeFileT<bits>&>(peFile).impDir();
   imp.rebuild(importOut.old_imports, 0);
 
   // filling new import table
   auto newImp = GenerateDefaultImports<bits>();
-  newImp.rebuild(importOut.new_imports, 0);
+  newImp.rebuild(importOut.new_imports, newImportTableRVA);
 }
 
 class DumpImportsVisitor : public PeLib::PeFileVisitor
 {
 public:
-  DumpImportsVisitor(const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut) :
+  DumpImportsVisitor(const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut, PeLib::dword newImportTableRVA):
     sourceFileBuff_(sourceFileBuff)
     , importOut_(importOut)
+    , newImportTableRVA_(newImportTableRVA)
   {}
   virtual void callback(PeLib::PeFile32& file)
   {
-    dumpImportDirectory<32>(file, sourceFileBuff_, importOut_);
+    dumpImportDirectory<32>(file, sourceFileBuff_, importOut_, newImportTableRVA_);
   }
   virtual void callback(PeLib::PeFile64& file)
   {
-    dumpImportDirectory<64>(file, sourceFileBuff_, importOut_);
+    dumpImportDirectory<64>(file, sourceFileBuff_, importOut_, newImportTableRVA_);
   }
 private:
   const std::vector<uint8_t>& sourceFileBuff_;
   ImportsArr& importOut_;
+  PeLib::dword newImportTableRVA_;
 };
 
-ImportsArr ImportPacker::ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff)
+ImportsArr ImportPacker::ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, PeLib::dword newImportTableRVA)
 {
   ImportsArr importsData;
 
-  DumpImportsVisitor importsVisitor(sourceFileBuff, importsData);
+  DumpImportsVisitor importsVisitor(sourceFileBuff, importsData, newImportTableRVA);
   srcPEFile_->visit(importsVisitor);
 
   return importsData;
