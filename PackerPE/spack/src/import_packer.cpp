@@ -15,7 +15,6 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports()
 template<int bits>
 void dumpImportDirectory(
   PeLib::PeFile& peFile
-  , const std::vector<uint8_t>& sourceFileBuff
   , ImportsArr& importOut
   , PeLib::dword newImportTableRVA)
 {
@@ -35,30 +34,43 @@ void dumpImportDirectory(
 class DumpImportsVisitor : public PeLib::PeFileVisitor
 {
 public:
-  DumpImportsVisitor(const std::vector<uint8_t>& sourceFileBuff, ImportsArr& importOut, PeLib::dword newImportTableRVA):
-    sourceFileBuff_(sourceFileBuff)
-    , importOut_(importOut)
+  DumpImportsVisitor(ImportsArr& importOut, PeLib::dword newImportTableRVA):
+    importOut_(importOut)
     , newImportTableRVA_(newImportTableRVA)
   {}
   virtual void callback(PeLib::PeFile32& file)
   {
-    dumpImportDirectory<32>(file, sourceFileBuff_, importOut_, newImportTableRVA_);
+    dumpImportDirectory<32>(file, importOut_, newImportTableRVA_);
   }
   virtual void callback(PeLib::PeFile64& file)
   {
-    dumpImportDirectory<64>(file, sourceFileBuff_, importOut_, newImportTableRVA_);
+    dumpImportDirectory<64>(file, importOut_, newImportTableRVA_);
   }
 private:
-  const std::vector<uint8_t>& sourceFileBuff_;
   ImportsArr& importOut_;
   PeLib::dword newImportTableRVA_;
 };
 
-ImportsArr ImportPacker::ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, PeLib::dword newImportTableRVA)
+uint32_t ImportPacker::GetRequiredSpaceSize() const
+{
+  return 5;
+}
+/*
+uint32_t ImportPacker::GetRequiredSpaceSize() const
 {
   ImportsArr importsData;
 
-  DumpImportsVisitor importsVisitor(sourceFileBuff, importsData, newImportTableRVA);
+  DumpImportsVisitor importsVisitor(importsData, 0);
+  srcPEFile_->visit(importsVisitor);
+
+  return importsData.new_imports.size();
+}*/
+
+ImportsArr ImportPacker::ProcessExecutable(PeLib::dword newImportTableRVA)
+{
+  ImportsArr importsData;
+
+  DumpImportsVisitor importsVisitor(importsData, newImportTableRVA);
   srcPEFile_->visit(importsVisitor);
 
   return importsData;

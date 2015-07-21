@@ -23,7 +23,7 @@ namespace file_utils
     return readFile(filename.c_str());
   }
 
-  void writeFile(const char* filename, uint32_t offset, const char* pData, uint32_t cbData)
+  void writeFile(const char* filename, std::streamoff offset, const char* pData, uint32_t cbData)
   {
     std::fstream file(filename, std::fstream::out | std::fstream::binary | std::fstream::in | std::fstream::app);
     file.seekp(offset, std::ios::beg);

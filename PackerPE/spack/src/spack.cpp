@@ -104,6 +104,9 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     pef->readMzHeader();
     auto offset = rebuildMZHeader(pef, outFileBuffer, sourceFileBuff);
 
+    // stores data sizes required by different packers
+    std::vector<RequiredDataBlock> additionalSizeRequest;
+
     //-----------------------------------------------------
 
     pef->readPeHeader();
@@ -112,13 +115,16 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
 
     //-----------------------------------------------------
 
-    SectionsPacker sectionsPacker(pef);
-    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff);
+    ImportPacker importPacker(pef);
 
     //-----------------------------------------------------
 
-    ImportPacker importPacker(pef); // new import RVA passed here
-    auto importsArr = importPacker.ProcessExecutable(sourceFileBuff, 0);
+    SectionsPacker sectionsPacker(pef);
+    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff, std::move(additionalSizeRequest));
+
+    //-----------------------------------------------------
+
+    auto importsArr = importPacker.ProcessExecutable(0); // new import RVA passed here
 
     //-----------------------------------------------------
 

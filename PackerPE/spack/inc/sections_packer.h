@@ -9,7 +9,7 @@ public:
   SectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
     ISectionsPacker(srcPEFile)
   {}
-  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff);
+  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const std::vector<RequiredDataBlock> additionalSizeRequest);
   virtual Expected<ErrorCode> IsReady() const;
 private:
   uint32_t GetSectionsOffset() const;

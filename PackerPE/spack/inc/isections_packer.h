@@ -7,11 +7,31 @@
 #include "includes.h"
 #include "error_defines.h"
 
+enum class PackerTypes
+{
+  kImportPacker,
+  kSectionsPacker,
+};
+
+struct RequiredDataBlock
+{
+  uint32_t size;
+  PackerTypes ownerType;
+};
+
+struct DataBlock
+{
+  uint32_t offset;
+  uint32_t size;
+  PackerTypes ownerType;
+};
+
 struct Section
 {
-  PeLib::PELIB_IMAGE_SECTION_HEADER new_header;
-  PeLib::PELIB_IMAGE_SECTION_HEADER original_header;
+  PeLib::PELIB_IMAGE_SECTION_HEADER newHeader;
+  PeLib::PELIB_IMAGE_SECTION_HEADER originalHeader;
   std::vector<uint8_t> data;
+  std::vector<DataBlock> additionalDataBlocks;
 };
 
 typedef std::list<Section> SectionsArr;
@@ -23,7 +43,7 @@ public:
     srcPEFile_(srcPEFile)
   {}
   virtual ~ISectionsPacker(){};
-  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff) = 0;
+  virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const std::vector<RequiredDataBlock> additionalSizeRequest) = 0;
   /*! \brief Validates source executable
   * This function is used to validate source PE-file, checking
   * whether its ready for applying definite packer's part.
