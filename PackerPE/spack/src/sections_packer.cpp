@@ -2,7 +2,8 @@
 #include <PeLibAux.h>
 #include "sections_packer.h"
 
-void AppendRequiredSizeSection(SectionsArr& sectionsOut, const std::vector<RequiredDataBlock>& additionalSizeRequest)
+template <int bits>
+void AppendRequiredSizeSection(const PeLib::PeHeaderT<bits>& peh, SectionsArr& sectionsOut, const std::vector<RequiredDataBlock>& additionalSizeRequest)
 {
   uint32_t sizeRequest = 0;
   for (const auto& blockRequest : additionalSizeRequest)
@@ -11,17 +12,24 @@ void AppendRequiredSizeSection(SectionsArr& sectionsOut, const std::vector<Requi
   }
 
   Section newSectionInfo;
-  auto& newSectonHead = newSectionInfo.newHeader;
+  auto& newSectionHead = newSectionInfo.newHeader;
   //----------------------------------
   // Filling new section header
   
-  strcpy(reinterpret_cast<char*>(newSectonHead.Name), "new");
-  newSectonHead.SizeOfRawData = sizeRequest;
+  strcpy(reinterpret_cast<char*>(newSectionHead.Name), ".new");
+  newSectionHead.Characteristics = PeLib::PELIB_IMAGE_SCN_MEM_WRITE | PeLib::PELIB_IMAGE_SCN_MEM_READ | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PeLib::PELIB_IMAGE_SCN_CNT_CODE;
+  newSectionHead.SizeOfRawData = PeLib::alignOffset(sizeRequest, peh.getFileAlignment());
 
+  /*
+  setSizeOfRawData(uiSecnr, alignOffset(dwSize, getFileAlignment()));
+  setPointerToRawData(uiSecnr, dwOffset);
+  setVirtualSize(uiSecnr, alignOffset(dwSize, getSectionAlignment()));
+  setVirtualAddress(uiSecnr, dwRva);
+  */
   //----------------------------------
   // Filling new section data (just leaving cave here for further requesters)
 
-  newSectionInfo.data = decltype(newSectionInfo.data)(sizeRequest);
+  newSectionInfo.data = decltype(newSectionInfo.data)(newSectionHead.SizeOfRawData);
 
   //----------------------------------
   // Adding new section
@@ -63,7 +71,7 @@ void rebuildSections(
   //------------------------------------------------------------------------------
   // test only
 
-  AppendRequiredSizeSection(sectionsOut, additionalSizeRequest);
+  AppendRequiredSizeSection<bits>(peh, sectionsOut, additionalSizeRequest);
 
   //------------------------------------------------------------------------------
 }

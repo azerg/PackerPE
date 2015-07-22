@@ -121,7 +121,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     //-----------------------------------------------------
 
     SectionsPacker sectionsPacker(pef);
-    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff, std::move(additionalSizeRequest));
+    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff, additionalSizeRequest);
 
     //-----------------------------------------------------
 
