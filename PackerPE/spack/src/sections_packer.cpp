@@ -1,5 +1,33 @@
 //
+#include <PeLibAux.h>
 #include "sections_packer.h"
+
+void AppendRequiredSizeSection(SectionsArr& sectionsOut, const std::vector<RequiredDataBlock>& additionalSizeRequest)
+{
+  uint32_t sizeRequest = 0;
+  for (const auto& blockRequest : additionalSizeRequest)
+  {
+    sizeRequest += blockRequest.size;
+  }
+
+  Section newSectionInfo;
+  auto& newSectonHead = newSectionInfo.newHeader;
+  //----------------------------------
+  // Filling new section header
+  
+  strcpy(reinterpret_cast<char*>(newSectonHead.Name), "new");
+  newSectonHead.SizeOfRawData = sizeRequest;
+
+  //----------------------------------
+  // Filling new section data (just leaving cave here for further requesters)
+
+  newSectionInfo.data = decltype(newSectionInfo.data)(sizeRequest);
+
+  //----------------------------------
+  // Adding new section
+
+  sectionsOut.push_back(newSectionInfo);
+}
 
 template<int bits>
 void rebuildSections(
@@ -24,12 +52,6 @@ void rebuildSections(
     // test only
     sectionInfo.newHeader = sectionInfo.originalHeader;
     sectionInfo.data.assign(sectionDataBegin, sectionDataBegin + cbSection);
-
-    uint32_t sizeRequest = 0;
-    for (const auto& blockRequest: additionalSizeRequest)
-    {
-      sizeRequest += blockRequest.size;
-    }
     //------------------------------------------------------------------------------
 
     // saving section data
@@ -40,11 +62,9 @@ void rebuildSections(
 
   //------------------------------------------------------------------------------
   // test only
-  uint32_t sizeRequest = 0;
-  for (const auto& blockRequest : additionalSizeRequest)
-  {
-    sizeRequest += blockRequest.size;
-  }
+
+  AppendRequiredSizeSection(sectionsOut, additionalSizeRequest);
+
   //------------------------------------------------------------------------------
 }
 

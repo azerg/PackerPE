@@ -11,6 +11,4 @@ public:
   {}
   virtual SectionsArr ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const std::vector<RequiredDataBlock> additionalSizeRequest);
   virtual Expected<ErrorCode> IsReady() const;
-private:
-  uint32_t GetSectionsOffset() const;
 };

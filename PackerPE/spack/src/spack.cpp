@@ -116,6 +116,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     //-----------------------------------------------------
 
     ImportPacker importPacker(pef);
+    additionalSizeRequest.push_back({importPacker.GetRequiredSpaceSize(), PackerTypes::kImportPacker});
 
     //-----------------------------------------------------
 
