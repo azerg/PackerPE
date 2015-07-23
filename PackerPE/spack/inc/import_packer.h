@@ -12,6 +12,4 @@ public:
   uint32_t GetRequiredSpaceSize() const;
   ImportsArr ProcessExecutable(PeLib::dword importTableRVA);
   Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
-private:
-  uint32_t GetSectionsOffset() const;
 };

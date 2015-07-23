@@ -3,38 +3,62 @@
 #include "sections_packer.h"
 
 template <int bits>
-void AppendRequiredSizeSection(const PeLib::PeHeaderT<bits>& peh, SectionsArr& sectionsOut, const std::vector<RequiredDataBlock>& additionalSizeRequest)
+void AppendRequiredSizeSection(
+  const PeLib::PeHeaderT<bits>& newPeHeader
+  , SectionsArr& sectionsOut
+  , const std::vector<RequiredDataBlock>& additionalSizeRequest)
 {
-  uint32_t sizeRequest = 0;
-  for (const auto& blockRequest : additionalSizeRequest)
+  // processing all additional data blocks as one (for alpha)
+  auto sizeRequest = std::accumulate(additionalSizeRequest.cbegin(), additionalSizeRequest.cend(), 0,
+    [](int& left, const RequiredDataBlock& right)
   {
-    sizeRequest += blockRequest.size;
-  }
+    return left += right.size;
+  });
 
   Section newSectionInfo;
   auto& newSectionHead = newSectionInfo.newHeader;
   //----------------------------------
   // Filling new section header
   
-  strcpy(reinterpret_cast<char*>(newSectionHead.Name), ".new");
-  newSectionHead.Characteristics = PeLib::PELIB_IMAGE_SCN_MEM_WRITE | PeLib::PELIB_IMAGE_SCN_MEM_READ | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA | PeLib::PELIB_IMAGE_SCN_CNT_CODE;
-  newSectionHead.SizeOfRawData = PeLib::alignOffset(sizeRequest, peh.getFileAlignment());
+  strcpy_s(reinterpret_cast<char*>(newSectionHead.Name), sizeof(newSectionHead.Name), ".new");
+  newSectionHead.Characteristics =
+    PeLib::PELIB_IMAGE_SCN_MEM_WRITE
+    | PeLib::PELIB_IMAGE_SCN_MEM_READ
+    | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA
+    | PeLib::PELIB_IMAGE_SCN_CNT_CODE;
 
-  /*
-  setSizeOfRawData(uiSecnr, alignOffset(dwSize, getFileAlignment()));
-  setPointerToRawData(uiSecnr, dwOffset);
-  setVirtualSize(uiSecnr, alignOffset(dwSize, getSectionAlignment()));
-  setVirtualAddress(uiSecnr, dwRva);
-  */
+  auto lastSection = sectionsOut.sections.back();
+  newSectionHead.PointerToRawData = lastSection.newHeader.PointerToRawData + lastSection.newHeader.SizeOfRawData;
+  newSectionHead.SizeOfRawData = PeLib::alignOffset(sizeRequest, newPeHeader.getFileAlignment());
+
+  newSectionHead.VirtualAddress = lastSection.newHeader.VirtualAddress +
+    PeLib::alignOffset(lastSection.newHeader.VirtualSize, newPeHeader.getSectionAlignment());
+  newSectionHead.VirtualSize = PeLib::alignOffset(sizeRequest, newPeHeader.getSectionAlignment());
+
   //----------------------------------
   // Filling new section data (just leaving cave here for further requesters)
 
   newSectionInfo.data = decltype(newSectionInfo.data)(newSectionHead.SizeOfRawData);
 
   //----------------------------------
-  // Adding new section
+  // Adding new section to list of headers
 
-  sectionsOut.push_back(newSectionInfo);
+  sectionsOut.sections.push_back(newSectionInfo);
+
+  //----------------------------------
+  // Filling a list of pointers to requested blocks
+
+  auto currentBlocksOffset = 0;
+  for (auto& sizeRequestBlock : additionalSizeRequest)
+  {
+    sectionsOut.additionalDataBlocks.push_back(
+    {newSectionHead.PointerToRawData + currentBlocksOffset
+      , newSectionHead.VirtualAddress + currentBlocksOffset
+      , sizeRequestBlock.size
+      , sizeRequestBlock.ownerType});
+
+    currentBlocksOffset += sizeRequestBlock.size;
+  }
 }
 
 template<int bits>
@@ -63,17 +87,13 @@ void rebuildSections(
     //------------------------------------------------------------------------------
 
     // saving section data
-    sectionsOut.push_back(std::move(sectionInfo));
+    sectionsOut.sections.push_back(std::move(sectionInfo));
 
     cbSections += cbSection;
   }
 
-  //------------------------------------------------------------------------------
-  // test only
-
+  // test only - append reqiured buffer as a new section
   AppendRequiredSizeSection<bits>(peh, sectionsOut, additionalSizeRequest);
-
-  //------------------------------------------------------------------------------
 }
 
 class DumpSectionsVisitor: public PeLib::PeFileVisitor

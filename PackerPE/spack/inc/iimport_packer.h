@@ -10,6 +10,9 @@
 
 struct ImportEntry
 {
+  ImportEntry(){}
+  ImportEntry(ImportEntry&&) = default;
+  ImportEntry& operator=(ImportEntry&&) = default;
   std::vector<PeLib::byte> old_imports;
   std::vector<PeLib::byte> new_imports;
 };

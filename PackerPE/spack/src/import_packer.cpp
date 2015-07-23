@@ -53,18 +53,13 @@ private:
 
 uint32_t ImportPacker::GetRequiredSpaceSize() const
 {
-  return 5;
-}
-/*
-uint32_t ImportPacker::GetRequiredSpaceSize() const
-{
   ImportsArr importsData;
 
   DumpImportsVisitor importsVisitor(importsData, 0);
   srcPEFile_->visit(importsVisitor);
 
-  return importsData.new_imports.size();
-}*/
+  return importsData.new_imports.size() + importsData.old_imports.size();
+}
 
 ImportsArr ImportPacker::ProcessExecutable(PeLib::dword newImportTableRVA)
 {

@@ -21,7 +21,8 @@ struct RequiredDataBlock
 
 struct DataBlock
 {
-  uint32_t offset;
+  uint32_t rawOffset;
+  uint32_t virtualOffset; // uint64_t ?
   uint32_t size;
   PackerTypes ownerType;
 };
@@ -31,10 +32,13 @@ struct Section
   PeLib::PELIB_IMAGE_SECTION_HEADER newHeader;
   PeLib::PELIB_IMAGE_SECTION_HEADER originalHeader;
   std::vector<uint8_t> data;
-  std::vector<DataBlock> additionalDataBlocks;
 };
 
-typedef std::list<Section> SectionsArr;
+struct SectionsArr
+{
+  std::list<Section> sections;
+  std::vector<DataBlock> additionalDataBlocks; // blocks allocated in packed file for other packers
+};
 
 class ISectionsPacker
 {
