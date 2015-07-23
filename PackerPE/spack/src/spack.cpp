@@ -125,7 +125,23 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
 
     //-----------------------------------------------------
 
-    auto importsArr = importPacker.ProcessExecutable(0); // new import RVA passed here
+    // pick last section VA to use it as new imports VA
+    auto additionalImportsBlock = std::find_if(
+      sectionsArr.additionalDataBlocks.begin()
+      , sectionsArr.additionalDataBlocks.end()
+      ,[&](decltype(sectionsArr.additionalDataBlocks)::value_type& valIt)
+    {
+      return valIt.ownerType == PackerTypes::kImportPacker;
+    });
+
+    auto newImportsVA = 0;
+    
+    if (additionalImportsBlock != sectionsArr.additionalDataBlocks.end())
+    {
+      newImportsVA = additionalImportsBlock->virtualOffset;
+    }
+
+    auto importsArr = importPacker.ProcessExecutable(newImportsVA); // new import RVA passed here
 
     //-----------------------------------------------------
 
