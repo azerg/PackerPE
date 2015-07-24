@@ -8,6 +8,7 @@
 
 #include "sections_packer.h"
 #include "import_packer.h"
+#include "new_pe_builder.h"
 #include "file_utils.h"
 #include "tiny_logger.h"
 
@@ -142,6 +143,13 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     }
 
     auto importsArr = importPacker.ProcessExecutable(newImportsVA); // new import RVA passed here
+
+    //-----------------------------------------------------
+    // generating output file contents
+
+    NewPEBuilder newPEBuilder(sectionsArr, importsArr, pef);
+
+    newPEBuilder.GenerateOutputPEFile();
 
     //-----------------------------------------------------
 
