@@ -6,9 +6,13 @@
 class NewPEBuilder: INewPEBuilder
 {
 public:
-  NewPEBuilder(SectionsArr& newSections, ImportsArr& newImports, std::shared_ptr<PeLib::PeFile>& srcPeFile):
-    INewPEBuilder(newSections, newImports, srcPeFile)
+  NewPEBuilder(
+    SectionsArr& newSections
+    , ImportsArr& newImports
+    , PeFilePtr& srcPeFile
+    , const std::vector<uint8_t>& sourceFileBuff):
+    INewPEBuilder(newSections, newImports, srcPeFile, sourceFileBuff)
   {}
 
-  Expected<ErrorCode> GenerateOutputPEFile();
+  Expected<std::vector<uint8_t>> GenerateOutputPEFile();
 };

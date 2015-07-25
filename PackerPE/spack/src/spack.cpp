@@ -147,7 +147,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     //-----------------------------------------------------
     // generating output file contents
 
-    NewPEBuilder newPEBuilder(sectionsArr, importsArr, pef);
+    NewPEBuilder newPEBuilder(sectionsArr, importsArr, pef, sourceFileBuff);
 
     newPEBuilder.GenerateOutputPEFile();
 
