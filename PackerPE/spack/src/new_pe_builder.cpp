@@ -24,43 +24,63 @@ namespace pe_builder
     return cbMZHead + cbJunkData;
   }
 
-  template<int bits>
-  void rebuildPEHeader(PeLib::PeFile& peFile, std::vector<uint8_t>& outFileBuffer, uint32_t& offset)
-  {
-    const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
-
-    std::vector<PeLib::byte> peHeaderBuff;
-    peh.rebuild(peHeaderBuff);
-
-    PeLib::PeHeaderT<bits> pehOut;
-    auto cbAfterHeader = peh.size();
-    std::copy(peHeaderBuff.cbegin(), peHeaderBuff.cend(), std::back_inserter(outFileBuffer));
-
-    offset += pehOut.size();
-
-    // append with aligned zero-bytes
-    auto headersSize = peh.getSizeOfHeaders() - offset;
-    if (headersSize)
-    {
-      //todo(azerg): strip unused data by fixing size of headers ?
-      outFileBuffer.insert(outFileBuffer.end(), headersSize, 0);
-    }
-    offset += headersSize;
-  }
-
   //------------------------------------------------------------------------
 
   class DumpPeHeaderVisitor : public PeLib::PeFileVisitor
   {
   public:
-    DumpPeHeaderVisitor(std::vector<uint8_t>& outFileBuffer, uint32_t& offset) :
+    DumpPeHeaderVisitor(
+      std::vector<uint8_t>& outFileBuffer
+      , const SectionsArr& newSections
+      , const ImportsArr& newImports
+      , uint32_t& offset) :
       outFileBuffer_(outFileBuffer)
+      , newSections_(newSections)
+      , newImports_(newImports)
       , offset_(offset)
     {}
-    virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file, outFileBuffer_, offset_); }
-    virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file, outFileBuffer_, offset_); }
+    virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file); }
+    virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file); }
   private:
+    template<int bits>
+    void rebuildPEHeader(PeLib::PeFile& peFile)
+    {
+      const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
+
+      PeLib::PeHeaderT<bits> nPeh(peh); // rebuilding new Pe-header
+      //----------------------------------------------
+
+      nPeh.killSections(); // clean section headers
+      nPeh.setNumberOfSections(newSections_.sections.size());
+
+      for (const auto& section : newSections_.sections)
+      {
+        nPeh.addSection(section.newHeader);
+      }
+
+      //----------------------------------------------
+
+      std::vector<PeLib::byte> peHeaderBuff;
+      nPeh.rebuild(peHeaderBuff);
+
+      auto cbAfterHeader = nPeh.size();
+      std::copy(peHeaderBuff.cbegin(), peHeaderBuff.cend(), std::back_inserter(outFileBuffer_));
+
+      offset_ += peHeaderBuff.size();
+
+      // append with aligned zero-bytes
+      auto headersSize = nPeh.getSizeOfHeaders() - offset_;
+      if (headersSize)
+      {
+        //todo(azerg): strip unused data by fixing size of headers ?
+        outFileBuffer_.insert(outFileBuffer_.end(), headersSize, 0);
+      }
+      offset_ += headersSize;
+    }
+
     std::vector<uint8_t>& outFileBuffer_;
+    const SectionsArr& newSections_;
+    const ImportsArr& newImports_;
     uint32_t& offset_;
   };
 } // namespace pe_builder
@@ -73,7 +93,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   auto offset = pe_builder::rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
   srcPeFile_->readPeHeader();
-  pe_builder::DumpPeHeaderVisitor peVisitor(outFileBuffer, offset);
+  pe_builder::DumpPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
   srcPeFile_->visit(peVisitor);
 
   return outFileBuffer;
