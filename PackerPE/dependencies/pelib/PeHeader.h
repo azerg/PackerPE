@@ -53,9 +53,12 @@ namespace PeLib
       PeHeaderT() : m_uiOffset(0)
       {}
 
-      /// Remove all sections headers
+      /// Remove all sections headers.
       void killSections(); // EXPORT
-      
+
+      /// Add a section to the header.
+      int addSection(const PELIB_IMAGE_SECTION_HEADER& newSectionHead); // EXPORT
+
       /// Add a section to the header.
       int addSection(const std::string& strName, dword dwSize); // EXPORT
       
@@ -468,6 +471,17 @@ namespace PeLib
   {
     m_vIsh.clear();
     this->setNumberOfSections(0);
+  }
+
+  /**
+  * Adds a new section to the header.
+  * @param newSectionHead Complete header of a new PE-section
+  **/
+  template<int x>
+  int PeHeaderT<x>::addSection(const PELIB_IMAGE_SECTION_HEADER& newSectionHead)
+  {
+    m_vIsh.push_back(newSectionHead);
+    return m_vIsh.size() - 1;
   }
 
   /**
