@@ -51,8 +51,10 @@ namespace PeLib
       typedef typename FieldSizes<x>::VAR4_8 VAR4_8;
     
       PeHeaderT() : m_uiOffset(0)
-      {
-      }
+      {}
+
+      /// Remove all sections headers
+      void killSections(); // EXPORT
       
       /// Add a section to the header.
       int addSection(const std::string& strName, dword dwSize); // EXPORT
@@ -82,8 +84,8 @@ namespace PeLib
       /// Returns the number of the section which the given relative address points to.
       word getSectionWithRva(VAR4_8 rva) const; // EXPORT
 
-          bool isValid() const; // EXPORT
-          bool isValid(unsigned int foo) const; // EXPORT
+      bool isValid() const; // EXPORT
+      bool isValid(unsigned int foo) const; // EXPORT
 
       /// Corrects the current PE header.
       void makeValid(dword dwOffset); // EXPORT
@@ -456,7 +458,18 @@ namespace PeLib
   {
     m_inthHeader.dataDirectories.erase(m_inthHeader.dataDirectories.begin() + index);
   }
-      
+
+  /**
+  * Removes all section headers from Pe-Header.
+  * It is used to recreate PE-header based on old one, without copying all members one-by-one.
+  **/
+  template<int x>
+  void PeHeaderT<x>::killSections()
+  {
+    m_vIsh.clear();
+    this->setNumberOfSections(0);
+  }
+
   /**
   * Adds a new section to the header. The physical and virtual address as well as the virtual
   * size of the section will be determined automatically from the raw size. The section
