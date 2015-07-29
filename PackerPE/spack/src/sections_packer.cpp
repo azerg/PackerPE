@@ -20,7 +20,7 @@ void AppendRequiredSizeSection(
   //----------------------------------
   // Filling new section header
   
-  strcpy_s(reinterpret_cast<char*>(newSectionHead.Name), sizeof(newSectionHead.Name), ".new");
+  strcpy_s(reinterpret_cast<char*>(newSectionHead.Name), sizeof(newSectionHead.Name), ".new\x00\x00\x00\x00");
   newSectionHead.Characteristics =
     PeLib::PELIB_IMAGE_SCN_MEM_WRITE
     | PeLib::PELIB_IMAGE_SCN_MEM_READ

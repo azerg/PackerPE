@@ -46,6 +46,23 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     pef->readMzHeader();
     pef->readPeHeader();
 
+    pef->readExportDirectory();
+    pef->readImportDirectory();
+    pef->readResourceDirectory();
+    pef->readExportDirectory();
+    // <-- security directory ???
+    pef->readRelocationsDirectory();
+    pef->readDebugDirectory();
+    // <-- Architecture Specific Data ???
+    // <-- RVA of GP
+    pef->readTlsDirectory();
+    // <-- Load Config Directory ???
+    pef->readBoundImportDirectory();
+    pef->readIatDirectory();
+    // <-- Delay Import Descriptors ???
+    pef->readComHeaderDirectory();
+    // <-- Reserved ???
+
     //-----------------------------------------------------
 
     ImportPacker importPacker(pef);
@@ -81,7 +98,9 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
 
     NewPEBuilder newPEBuilder(sectionsArr, importsArr, pef, sourceFileBuff);
 
-    newPEBuilder.GenerateOutputPEFile();
+    auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
+
+    file_utils::writeFile(outFileName.c_str(), 0, reinterpret_cast<const char*>(outBuffer.data()), outBuffer.size());
 
     //-----------------------------------------------------
 
