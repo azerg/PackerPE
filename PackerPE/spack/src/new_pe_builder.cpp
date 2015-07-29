@@ -26,10 +26,10 @@ namespace pe_builder
 
   //------------------------------------------------------------------------
 
-  class DumpPeHeaderVisitor : public PeLib::PeFileVisitor
+  class RebuildPeHeaderVisitor : public PeLib::PeFileVisitor
   {
   public:
-    DumpPeHeaderVisitor(
+    RebuildPeHeaderVisitor(
       std::vector<uint8_t>& outFileBuffer
       , const SectionsArr& newSections
       , const ImportsArr& newImports
@@ -57,6 +57,22 @@ namespace pe_builder
       {
         nPeh.addSection(section.newHeader);
       }
+
+      // update PE-file with new import data
+      auto importBlock = std::find_if(
+        newSections_.additionalDataBlocks.cbegin()
+        , newSections_.additionalDataBlocks.cend()
+        ,[](const auto& block)->auto
+      {
+        return block.ownerType == PackerTypes::kImportPacker;
+      });
+
+      if (importBlock == newSections_.additionalDataBlocks.cend())
+      {
+        throw std::runtime_error("Cant find new import block");
+      }
+      nPeh.setIddImportRva(importBlock->virtualOffset);
+      nPeh.setIddImportSize(importBlock->size);
 
       //----------------------------------------------
 
@@ -93,7 +109,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   auto offset = pe_builder::rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
   srcPeFile_->readPeHeader();
-  pe_builder::DumpPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
+  pe_builder::RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
   srcPeFile_->visit(peVisitor);
 
   return outFileBuffer;
