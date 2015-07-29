@@ -408,8 +408,6 @@ namespace PeLib
     {
       return comDir().read(getFileName(), static_cast<unsigned int>(peHeader().rvaToOffset(peHeader().getIddComHeaderRva())), peHeader().getIddComHeaderSize());
     }
-      std::cout << peHeader().getIddComHeaderRva() << std::endl;
-      std::exit(0);
     return ERROR_DIRECTORY_DOES_NOT_EXIST;
   }
 
