@@ -106,9 +106,6 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   std::vector<uint8_t> outFileBuffer;
   auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
-  // configure headers
-  srcPeFile_->readPeHeader();
-
   RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
   srcPeFile_->visit(peVisitor);
 
@@ -127,13 +124,14 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   {
     return block.ownerType == PackerTypes::kImportPacker;
   });
-  //memcpy(&outFileBuffer.at(importBlock->rawOffset), )
+
   // removing preallocated buffer
-  std::cout << outFileBuffer.size() << " || " << newImports_.new_imports.size() << std::endl;
-  outFileBuffer.erase(outFileBuffer.begin() + importBlock->rawOffset, outFileBuffer.begin() + importBlock->rawOffset + newImports_.new_imports.size());
-  std::cout << outFileBuffer.size() << std::endl;
-  outFileBuffer.insert(outFileBuffer.begin() + importBlock->rawOffset, newImports_.new_imports.cbegin(), newImports_.new_imports.cend());
-  std::cout << outFileBuffer.size() << std::endl;
+  outFileBuffer.erase(
+    outFileBuffer.begin() + importBlock->rawOffset
+    , outFileBuffer.begin() + importBlock->rawOffset + newImports_.new_imports.size());
+  outFileBuffer.insert(
+    outFileBuffer.begin() + importBlock->rawOffset
+    , newImports_.new_imports.cbegin(), newImports_.new_imports.cend());
 
   //--------------------------------------------------------------------------------
 
