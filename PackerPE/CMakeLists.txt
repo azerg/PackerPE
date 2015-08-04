@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(SOLUTION_NAME "spack")
-set_property(GLOBAL PROPERTY USE_FOLDERS On)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # leaving only Release& Debug configurations
 IF(NOT CMAKE_BUILD_TYPE)
