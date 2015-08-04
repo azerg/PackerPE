@@ -1,11 +1,13 @@
 // stub2rsrc.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include <memory>
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <tchar.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include "../PELib/MemFile.h"
 
 #pragma comment(lib, "PELib.lib")

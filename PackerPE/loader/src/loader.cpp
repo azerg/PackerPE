@@ -2,6 +2,7 @@
 //
 
 #include "includes.h"
+#include "loader.h"
 
 int StubEP()
 {
@@ -54,7 +55,7 @@ void UnpackSections(PSTUB_DATA pStubData)
   DWORD dwNumberOfSections = pNtHead->FileHeader.NumberOfSections;
 
   DWORD dwUnpackedSize = 0;
-  for (auto i = 0; i < dwNumberOfSections; ++i, ++pSectionHead)
+  for (DWORD i = 0; i < dwNumberOfSections; ++i, ++pSectionHead)
   {
     if (pSectionHead->SizeOfRawData == 0)
     {

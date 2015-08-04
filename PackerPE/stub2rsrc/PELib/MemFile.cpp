@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 #include "MemFile.h"
 
 namespace PE
