@@ -4,12 +4,7 @@ set(SOLUTION_NAME "spack")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # leaving only Release& Debug configurations
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Debug Release)
-   set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-     "Reset the configurations to what we need"
-     FORCE)  
-ENDIF(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_CONFIGURATION_TYPES Release Debug CACHE TYPE INTERNAL FORCE )
 
 ##################################################################################################################
 project (${SOLUTION_NAME})
