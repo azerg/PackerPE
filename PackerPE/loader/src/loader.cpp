@@ -63,7 +63,7 @@ void UnpackSections(PSTUB_DATA pStubData)
     }
 
     DWORD dwRsrc = 0x72737263; // "rsrc"
-    if (strncmp(reinterpret_cast<char*>(&pSectionHead->Name[1]), reinterpret_cast<char*>(&dwRsrc), 4) == 0)
+    if (memcmp(reinterpret_cast<char*>(&pSectionHead->Name[1]), reinterpret_cast<char*>(&dwRsrc), 4) == 0)
     {
       continue;
     }
