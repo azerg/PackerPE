@@ -4,7 +4,7 @@ set(SOLUTION_NAME "spack")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # leaving only Release& Debug configurations
-set(CMAKE_CONFIGURATION_TYPES Release Debug CACHE TYPE INTERNAL FORCE )
+set(CMAKE_CONFIGURATION_TYPES Release Debug CACHE TYPE INTERNAL FORCE)
 
 ##################################################################################################################
 project (${SOLUTION_NAME})
