@@ -5,7 +5,7 @@ set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
 set(Boost_USE_STATIC_LIBS ON)
 
-file(GLOB MainProjInc "inc/*.*")
+file(GLOB MainProjInc "inc/*.*" ${common_inc}/stub_data.h)
 file(GLOB MainProjSrc "src/*.*")
 
 include_directories("inc" ${common_inc})

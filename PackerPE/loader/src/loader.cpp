@@ -6,7 +6,7 @@
 
 int StubEP()
 {
-  PSTUB_DATA pStubData;
+  stub::PSTUB_DATA pStubData;
 
   // get address of STUB_DATA
   // we know that it's located straight before our code.
@@ -35,16 +35,16 @@ int StubEP()
   return 0;
 }
 
-void StartOriginalPE(PSTUB_DATA pStubData)
+void StartOriginalPE(stub::PSTUB_DATA pStubData)
 {
-  LPVOID pOriginalEP = reinterpret_cast<LPVOID>(pStubData->dwOriginalEP);
+  auto pOriginalEP = reinterpret_cast<LPVOID>(pStubData->dwOriginalEP);
   __asm
   {
     jmp pOriginalEP
   }
 }
 
-void UnpackSections(PSTUB_DATA pStubData)
+void UnpackSections(stub::PSTUB_DATA pStubData)
 {
   PIMAGE_DOS_HEADER pDOSHead = reinterpret_cast<PIMAGE_DOS_HEADER>(pStubData->dwImageBase);
   PIMAGE_NT_HEADERS32 pNtHead = reinterpret_cast<PIMAGE_NT_HEADERS32>(reinterpret_cast<char*>(pDOSHead) + pDOSHead->e_lfanew);
@@ -68,6 +68,7 @@ void UnpackSections(PSTUB_DATA pStubData)
       continue;
     }
 
+    /*
     pStubData->pRtlDecompressBuffer(
       COMPRESSION_FORMAT_LZNT1,
       reinterpret_cast<PUCHAR>(pStubData->dwImageBase + pSectionHead->VirtualAddress),
@@ -75,6 +76,7 @@ void UnpackSections(PSTUB_DATA pStubData)
       reinterpret_cast<PUCHAR>(pStubData->dwImageBase + pSectionHead->VirtualAddress),
       pSectionHead->Misc.VirtualSize,
       reinterpret_cast<PULONG>(dwUnpackedSize));
+    */
   }
 }
 

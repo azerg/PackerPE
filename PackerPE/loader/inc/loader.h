@@ -1,30 +1,14 @@
 #pragma once
 
 #include "Windows.h"
+#include "stub_data.h"
 
 typedef LONG NTSTATUS, *PNTSTATUS;
 typedef NTSTATUS ( __stdcall *fpRtlDecompressBuffer )( USHORT, PUCHAR, ULONG, PUCHAR, ULONG, PULONG );
 
-typedef struct STUB_DATA_
-{
-    DWORD pLoadLibrary;
-    DWORD pGetProcAddress;
-    DWORD unused_iatnull_0;
-    fpRtlDecompressBuffer pRtlDecompressBuffer;
-    DWORD unused_iatnull_1;
-    DWORD dwImageBase;
-  DWORD dwOriginalEP;
-  DWORD dwOriIAT;
-  DWORD dwOriginalIVA;        //Original Virtual Address Of Import
-  DWORD dwOriginalIS;          //Original Size Of Import
-}STUB_DATA, *PSTUB_DATA;
-
-
 int StubEP();
-void StartOriginalPE( PSTUB_DATA pStubData );
-void UnpackSections( PSTUB_DATA pStubData );
-
-
+void StartOriginalPE( stub::PSTUB_DATA pStubData );
+void UnpackSections(stub::PSTUB_DATA pStubData );
 
 typedef struct _PEB {
 
