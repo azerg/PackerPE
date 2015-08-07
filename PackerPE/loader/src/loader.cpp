@@ -68,15 +68,13 @@ void UnpackSections(stub::PSTUB_DATA pStubData)
       continue;
     }
 
-    /*
-    pStubData->pRtlDecompressBuffer(
+    ((fpRtlDecompressBuffer)pStubData->pRtlDecompressBuffer)(
       COMPRESSION_FORMAT_LZNT1,
       reinterpret_cast<PUCHAR>(pStubData->dwImageBase + pSectionHead->VirtualAddress),
       pSectionHead->SizeOfRawData,
       reinterpret_cast<PUCHAR>(pStubData->dwImageBase + pSectionHead->VirtualAddress),
       pSectionHead->Misc.VirtualSize,
       reinterpret_cast<PULONG>(dwUnpackedSize));
-    */
   }
 }
 

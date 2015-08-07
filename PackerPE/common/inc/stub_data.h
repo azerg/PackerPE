@@ -2,13 +2,13 @@
 
 namespace stub
 {
+  typedef DWORD pointer_t;
   // todo(azerg) redesign for x64 & x86 etc. required
   typedef struct STUB_DATA_
   {
-    DWORD pLoadLibrary;
-    DWORD pGetProcAddress;
-    DWORD unused_iatnull_0;
-    //fpRtlDecompressBuffer pRtlDecompressBuffer; <-- uint64_t?
+    pointer_t pLoadLibrary;
+    pointer_t pGetProcAddress;
+    pointer_t pRtlDecompressBuffer; // <-- uint64 !!!!
     DWORD unused_iatnull_1;
     DWORD dwImageBase;
     DWORD dwOriginalEP;
