@@ -63,7 +63,7 @@ private:
       , newSections_.additionalDataBlocks.cend()
       ,[](const auto& block)->auto
     {
-      return block.ownerType == PackerTypes::kImportPacker;
+      return block.ownerType == PackerType::kImportPacker;
     });
 
     if (importBlock == newSections_.additionalDataBlocks.cend())
@@ -122,7 +122,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
     , newSections_.additionalDataBlocks.cend()
     , [](const auto& block)->auto
   {
-    return block.ownerType == PackerTypes::kImportPacker;
+    return block.ownerType == PackerType::kImportPacker;
   });
 
   // removing preallocated buffer

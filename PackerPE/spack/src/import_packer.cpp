@@ -70,3 +70,16 @@ ImportsArr ImportPacker::ProcessExecutable(PeLib::dword newImportTableRVA)
 
   return importsData;
 }
+
+std::vector<RequiredDataBlock> ImportPacker::GetRequiredDataBlocks() const
+{
+  ImportsArr importsData;
+
+  DumpImportsVisitor importsVisitor(importsData, 0);
+  srcPEFile_->visit(importsVisitor);
+
+  std::vector<RequiredDataBlock> result;
+  result.push_back({importsData.new_imports.size() + importsData.old_imports.size(), packerType_});
+
+  return result;
+}

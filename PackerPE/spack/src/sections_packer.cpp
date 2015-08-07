@@ -127,8 +127,3 @@ SectionsArr SectionsPacker::ProcessExecutable(const std::vector<uint8_t>& source
 
   return newSections;
 }
-
-Expected<ErrorCode> SectionsPacker::IsReady() const
-{
-  return ErrorCode::ERROR_SUCC;
-}

@@ -12,4 +12,5 @@ public:
   uint32_t GetRequiredSpaceSize() const;
   ImportsArr ProcessExecutable(PeLib::dword importTableRVA);
   Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
+  std::vector<RequiredDataBlock> GetRequiredDataBlocks() const;
 };

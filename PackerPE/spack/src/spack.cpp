@@ -14,6 +14,30 @@
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
 
+template <class PeFileType>
+void LoadPeFile(PeFileType& pef)
+{
+  pef->readMzHeader();
+  pef->readPeHeader();
+
+  pef->readExportDirectory();
+  pef->readImportDirectory();
+  pef->readResourceDirectory();
+  pef->readExportDirectory();
+  // <-- security directory ???
+  pef->readRelocationsDirectory();
+  pef->readDebugDirectory();
+  // <-- Architecture Specific Data ???
+  // <-- RVA of GP
+  pef->readTlsDirectory();
+  // <-- Load Config Directory ???
+  pef->readBoundImportDirectory();
+  pef->readIatDirectory();
+  // <-- Delay Import Descriptors ???
+  pef->readComHeaderDirectory();
+  // <-- Reserved ???
+}
+
 ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outFileName)
 {
   try
@@ -41,32 +65,11 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     // stores data sizes required by different packers
     std::vector<RequiredDataBlock> additionalSizeRequest;
 
-    //-----------------------------------------------------
-
-    pef->readMzHeader();
-    pef->readPeHeader();
-
-    pef->readExportDirectory();
-    pef->readImportDirectory();
-    pef->readResourceDirectory();
-    pef->readExportDirectory();
-    // <-- security directory ???
-    pef->readRelocationsDirectory();
-    pef->readDebugDirectory();
-    // <-- Architecture Specific Data ???
-    // <-- RVA of GP
-    pef->readTlsDirectory();
-    // <-- Load Config Directory ???
-    pef->readBoundImportDirectory();
-    pef->readIatDirectory();
-    // <-- Delay Import Descriptors ???
-    pef->readComHeaderDirectory();
-    // <-- Reserved ???
-
+    LoadPeFile(pef);
     //-----------------------------------------------------
 
     ImportPacker importPacker(pef);
-    additionalSizeRequest.push_back({importPacker.GetRequiredSpaceSize(), PackerTypes::kImportPacker});
+    additionalSizeRequest.push_back({importPacker.GetRequiredSpaceSize(), PackerType::kImportPacker});
 
     //-----------------------------------------------------
 
@@ -81,7 +84,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
       , sectionsArr.additionalDataBlocks.end()
       ,[&](decltype(sectionsArr.additionalDataBlocks)::value_type& valIt)
     {
-      return valIt.ownerType == PackerTypes::kImportPacker;
+      return valIt.ownerType == PackerType::kImportPacker;
     });
 
     auto newImportsVA = 0;

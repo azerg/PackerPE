@@ -8,7 +8,7 @@ namespace stub
   {
     pointer_t pLoadLibrary;
     pointer_t pGetProcAddress;
-    pointer_t pRtlDecompressBuffer; // <-- uint64 !!!!
+    pointer_t pRtlDecompressBuffer;
     DWORD unused_iatnull_1;
     DWORD dwImageBase;
     DWORD dwOriginalEP;

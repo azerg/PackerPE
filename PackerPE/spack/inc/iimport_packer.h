@@ -4,9 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include "includes.h"
-#include "expected.hpp"
-
-#include "error_defines.h"
+#include "ipacker_base.h"
 
 struct ImportEntry
 {
@@ -20,23 +18,14 @@ struct ImportEntry
 
 typedef ImportEntry ImportsArr;
 
-class IImportPacker
+class IImportPacker:
+  public IPackerBase
 {
 public:
   IImportPacker(std::shared_ptr<PeLib::PeFile> srcPEFile):
-    srcPEFile_(srcPEFile)
+    IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
   virtual uint32_t GetRequiredSpaceSize() const = 0;
   virtual ImportsArr ProcessExecutable(PeLib::dword importTableRVA) = 0;
-  /*! \brief Validates source executable
-  * This function is used to validate source PE-file, checking
-  * whether its ready for applying definite packer's part.
-  * Goal of this proc is to make all packer's pieces to be completely
-  * independent.
-  */
-  virtual Expected<ErrorCode> IsReady() const = 0;
-
-protected:
-  std::shared_ptr<PeLib::PeFile> srcPEFile_;
 };
