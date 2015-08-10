@@ -86,7 +86,8 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
       , sectionsArr.additionalDataBlocks.end()
       ,[&](decltype(sectionsArr.additionalDataBlocks)::value_type& valIt)
     {
-      return valIt.ownerType == PackerType::kImportPacker;
+      return valIt.ownerType == PackerType::kImportPacker &&
+        valIt.packerParam == (int32_t)ImportBlockTypes::kNewImportData;
     });
 
     auto newImportsVA = 0;

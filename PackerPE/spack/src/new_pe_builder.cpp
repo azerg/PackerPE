@@ -1,6 +1,7 @@
 //
 
 #include "new_pe_builder.h"
+#include "import_packer.h"
 #include <iostream>
 
 uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
@@ -23,7 +24,7 @@ uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer,
   return cbMZHead + cbJunkData;
 }
 
-//------------------------------------------------------------------------
+//==============================================================================
 
 class RebuildPeHeaderVisitor : public PeLib::PeFileVisitor
 {
@@ -41,12 +42,20 @@ public:
   virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file); }
   virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file); }
 private:
+  template <int bits>
+  void UpdateSizeOfImage(PeLib::PeHeaderT<bits> newPeHeader)
+  {
+    auto lastSectionHead = newSections_.sections.back().newHeader;
+    newPeHeader.setSizeOfImage(lastSectionHead.VirtualAddress + lastSectionHead.VirtualSize);
+  }
+
   template<int bits>
   void rebuildPEHeader(PeLib::PeFile& peFile)
   {
     const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
 
     PeLib::PeHeaderT<bits> nPeh(peh); // rebuilding new Pe-header
+
     //----------------------------------------------
 
     nPeh.killSections(); // clean section headers
@@ -78,9 +87,10 @@ private:
     //--------------------------------------------------------------------------------
     // Updating SizeOfImage
     
-    todo(azerg)
+    UpdateSizeOfImage(nPeh);
 
     //----------------------------------------------
+    // saving new PE-HEad in output buffer
 
     std::vector<PeLib::byte> peHeaderBuff;
     nPeh.rebuild(peHeaderBuff);
@@ -106,7 +116,21 @@ private:
   uint32_t& offset_;
 };
 
-// ---------------------------------------------------------------
+//==================================================================================
+template <class OutFileBufferType, class OffsetType, class NewImportsContainerType>
+void ReplaceContainerData(OutFileBufferType& outFileBuffer, OffsetType rawOffset, NewImportsContainerType& new_imports)
+{
+  // removing preallocated buffer
+  outFileBuffer.erase(
+    outFileBuffer.begin() + rawOffset
+    , outFileBuffer.begin() + rawOffset + new_imports.size());
+  // inserting new import data
+  outFileBuffer.insert(
+    outFileBuffer.begin() + rawOffset
+    , new_imports.cbegin(), new_imports.cend());
+}
+
+//==================================================================================
 
 Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
 {
@@ -123,26 +147,37 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
     std::move(section.data.cbegin(), section.data.cend(), std::back_inserter(outFileBuffer));
   }
 
+  //--------------------------------------------------------------------------------
   // insert imports data
-  auto importBlock = std::find_if(
+
+  decltype(newSections_.additionalDataBlocks) importsBlocks;
+  auto importBlocks = std::copy_if(
     newSections_.additionalDataBlocks.cbegin()
     , newSections_.additionalDataBlocks.cend()
+    , importsBlocks.begin()
     , [](const auto& block)->auto
   {
     return block.ownerType == PackerType::kImportPacker;
   });
 
-  // removing preallocated buffer
-  outFileBuffer.erase(
-    outFileBuffer.begin() + importBlock->rawOffset
-    , outFileBuffer.begin() + importBlock->rawOffset + newImports_.new_imports.size());
-  // inserting new import data
-  outFileBuffer.insert(
-    outFileBuffer.begin() + importBlock->rawOffset
-    , newImports_.new_imports.cbegin(), newImports_.new_imports.cend());
+  for (auto& importBlock: importsBlocks)
+  {
+    if (importBlock.packerParam == (int32_t)ImportBlockTypes::kNewImportData)
+    {
+      ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.new_imports);
+    }
+    else
+    if (importBlock.packerParam == (int32_t)ImportBlockTypes::kNewImportData)
+    {
+      ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.old_imports);
+    }
+    else
+    {
+      return Expected<std::vector<uint8_t>>::fromException(std::runtime_error("eek unexpected buffer type"));
+    }
+  }
 
   //--------------------------------------------------------------------------------
 
   return outFileBuffer;
-  //return Expected<std::vector<uint8_t>>::fromException(std::runtime_error("eek"));
 }
