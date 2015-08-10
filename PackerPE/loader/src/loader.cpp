@@ -11,6 +11,7 @@ int StubEP()
   // get address of STUB_DATA
   // we know that it's located straight before our code.
   __asm {
+      int 3
     call __getmyaddr
       __getmyaddr :
     pop eax

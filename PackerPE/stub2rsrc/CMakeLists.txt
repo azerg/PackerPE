@@ -1,9 +1,3 @@
-set(common_inc ${CMAKE_HOME_DIRECTORY}/common/inc)
-
-set(BOOST_INCLUDEDIR "${BOOST_ROOT}")
-set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
-set(Boost_USE_STATIC_LIBS ON)
-
 file(GLOB MainProjInc "*.h" "PELib/*.h")
 file(GLOB MainProjSrc "*.cpp" "PELib/*.cpp")
 
