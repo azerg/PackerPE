@@ -13,6 +13,7 @@ struct RequiredDataBlock
 {
   uint32_t size;
   PackerType ownerType;
+  int32_t packerParam; // optinal value is set by packer and used in packer
 };
 
 struct DataBlock
@@ -21,6 +22,7 @@ struct DataBlock
   uint32_t virtualOffset; // uint64_t ?
   uint32_t size;
   PackerType ownerType;
+  int32_t packerParam;
 };
 
 // base class for all packers

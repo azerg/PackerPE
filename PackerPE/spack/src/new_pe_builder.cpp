@@ -3,13 +3,13 @@
 #include "new_pe_builder.h"
 #include <iostream>
 
-uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, std::vector<uint8_t>& sourceFileBuff)
+uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
   auto mzHead = peFile->mzHeader();
   mzHead.rebuild(mzHeadBuffer);
 
-  std::copy(mzHeadBuffer.cbegin(), mzHeadBuffer.cend(), std::back_inserter(outFileBuffer));
+  outFileBuffer = std::move(mzHeadBuffer);
 
   // append mzHeader with undocumented data located between MZHeader & PEHeader
   auto peOffset = mzHead.getAddressOfPeHeader();
@@ -52,9 +52,11 @@ private:
     nPeh.killSections(); // clean section headers
     nPeh.setNumberOfSections(newSections_.sections.size());
 
+    PeLib::dword sectionsSize = 0;
     for (const auto& section : newSections_.sections)
     {
       nPeh.addSection(section.newHeader);
+      sectionsSize += section.newHeader.SizeOfRawData;
     }
 
     // update PE-file with new import data
@@ -73,15 +75,20 @@ private:
     nPeh.setIddImportRva(importBlock->virtualOffset);
     nPeh.setIddImportSize(importBlock->size);
 
+    //--------------------------------------------------------------------------------
+    // Updating SizeOfImage
+    
+    todo(azerg)
+
     //----------------------------------------------
 
     std::vector<PeLib::byte> peHeaderBuff;
     nPeh.rebuild(peHeaderBuff);
 
     auto cbAfterHeader = nPeh.size();
-    std::copy(peHeaderBuff.cbegin(), peHeaderBuff.cend(), std::back_inserter(outFileBuffer_));
-
     offset_ += peHeaderBuff.size();
+
+    std::copy(std::begin(peHeaderBuff), std::end(peHeaderBuff), std::back_inserter(outFileBuffer_));
 
     // append with aligned zero-bytes
     auto headersSize = nPeh.getSizeOfHeaders() - offset_;
@@ -113,7 +120,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   // configure sections data
   for (const auto& section : newSections_.sections)
   {
-    std::copy(section.data.cbegin(), section.data.cend(), std::back_inserter(outFileBuffer));
+    std::move(section.data.cbegin(), section.data.cend(), std::back_inserter(outFileBuffer));
   }
 
   // insert imports data
@@ -129,6 +136,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   outFileBuffer.erase(
     outFileBuffer.begin() + importBlock->rawOffset
     , outFileBuffer.begin() + importBlock->rawOffset + newImports_.new_imports.size());
+  // inserting new import data
   outFileBuffer.insert(
     outFileBuffer.begin() + importBlock->rawOffset
     , newImports_.new_imports.cbegin(), newImports_.new_imports.cend());

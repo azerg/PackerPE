@@ -55,7 +55,8 @@ void AppendRequiredSizeSection(
     {newSectionHead.PointerToRawData + currentBlocksOffset
       , newSectionHead.VirtualAddress + currentBlocksOffset
       , sizeRequestBlock.size
-      , sizeRequestBlock.ownerType});
+      , sizeRequestBlock.ownerType
+      , sizeRequestBlock.packerParam});
 
     currentBlocksOffset += sizeRequestBlock.size;
   }

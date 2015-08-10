@@ -29,5 +29,5 @@ protected:
   SectionsArr newSections_;
   ImportsArr newImports_;
   PeFilePtr srcPeFile_;
-  std::vector<uint8_t> sourceFileBuff_;
+  const std::vector<uint8_t> sourceFileBuff_;
 };

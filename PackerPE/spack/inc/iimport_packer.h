@@ -26,6 +26,5 @@ public:
     IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
-  virtual uint32_t GetRequiredSpaceSize() const = 0;
   virtual ImportsArr ProcessExecutable(PeLib::dword importTableRVA) = 0;
 };
