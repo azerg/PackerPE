@@ -51,10 +51,30 @@ private:
   PeLib::dword newImportTableRVA_;
 };
 
-ImportsArr ImportPacker::ProcessExecutable(PeLib::dword newImportTableRVA)
+ImportsArr ImportPacker::ProcessExecutable(const decltype(SectionsArr::additionalDataBlocks)& additionalDataBlocks)
 {
-  ImportsArr importsData;
+  // pick last section VA to use it as new imports VA
+  auto additionalImportsBlock = std::find_if(
+    additionalDataBlocks.begin()
+    , additionalDataBlocks.end()
+    , [&](auto& valIt)
+  {
+    return valIt.ownerType == PackerType::kImportPacker &&
+      valIt.packerParam == ( int32_t )ImportBlockTypes::kNewImportData;
+  });
 
+  auto newImportTableRVA = 0;
+
+  if (additionalImportsBlock != additionalDataBlocks.end())
+  {
+    newImportTableRVA = additionalImportsBlock->virtualOffset;
+  }
+  else
+  {
+    throw std::runtime_error("unexpected error - missing new import table VA.");
+  }
+
+  ImportsArr importsData;
   DumpImportsVisitor importsVisitor(importsData, newImportTableRVA);
   srcPEFile_->visit(importsVisitor);
 

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "includes.h"
 #include "ipacker_base.h"
+#include "isections_packer.h"
 
 struct ImportEntry
 {
@@ -26,5 +27,5 @@ public:
     IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable(PeLib::dword importTableRVA) = 0;
+  virtual ImportsArr ProcessExecutable(const decltype(SectionsArr::additionalDataBlocks)& additionalDataBlocks) = 0;
 };

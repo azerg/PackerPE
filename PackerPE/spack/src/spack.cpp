@@ -8,6 +8,7 @@
 
 #include "sections_packer.h"
 #include "import_packer.h"
+#include "stub_packer.h"
 #include "new_pe_builder.h"
 #include "file_utils.h"
 #include "tiny_logger.h"
@@ -75,29 +76,18 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
 
     //-----------------------------------------------------
 
+    StubPacker stubPacker(pef);
+    auto stubRequiredBlocks = stubPacker.GetRequiredDataBlocks();
+    std::move(stubRequiredBlocks.begin(), stubRequiredBlocks.end(), std::back_inserter(additionalSizeRequest));
+
+    //-----------------------------------------------------
+
     SectionsPacker sectionsPacker(pef);
     auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff, additionalSizeRequest);
 
     //-----------------------------------------------------
 
-    // pick last section VA to use it as new imports VA
-    auto additionalImportsBlock = std::find_if(
-      sectionsArr.additionalDataBlocks.begin()
-      , sectionsArr.additionalDataBlocks.end()
-      ,[&](decltype(sectionsArr.additionalDataBlocks)::value_type& valIt)
-    {
-      return valIt.ownerType == PackerType::kImportPacker &&
-        valIt.packerParam == (int32_t)ImportBlockTypes::kNewImportData;
-    });
-
-    auto newImportsVA = 0;
-    
-    if (additionalImportsBlock != sectionsArr.additionalDataBlocks.end())
-    {
-      newImportsVA = additionalImportsBlock->virtualOffset;
-    }
-
-    auto importsArr = importPacker.ProcessExecutable(newImportsVA); // new import RVA passed here
+    auto importsArr = importPacker.ProcessExecutable(sectionsArr.additionalDataBlocks); // new import RVA passed here
 
     //-----------------------------------------------------
     // generating output file contents

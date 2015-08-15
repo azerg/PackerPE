@@ -9,11 +9,24 @@ enum class PackerType
   kStubPacker,
 };
 
+/*!
+* Every data block might have some requirements, e.g. it have to be allocated
+* in executable section, whatever..
+*/
+enum class DataBlockRequirements
+{
+  kNoRequirements,
+  kExecutableSection, // data might be located in executable section
+};
+
 struct RequiredDataBlock
 {
+  RequiredDataBlock(RequiredDataBlock&& right) = default;
+  RequiredDataBlock(const RequiredDataBlock&) = default;
   uint32_t size;
   PackerType ownerType;
   int32_t packerParam; // optinal value is set by packer and used in packer
+  std::vector<DataBlockRequirements> requirements;
 };
 
 struct DataBlock

@@ -15,7 +15,7 @@ public:
   ImportPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile) :
     IImportPacker(srcPEFile)
   {}
-  ImportsArr ProcessExecutable(PeLib::dword importTableRVA);
+  ImportsArr ProcessExecutable(const decltype(SectionsArr::additionalDataBlocks)& additionalDataBlocks);
   Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const;
 };
