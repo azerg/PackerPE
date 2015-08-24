@@ -9,7 +9,8 @@ enum class ImportBlockTypes : decltype(RequiredDataBlock::packerParam)
   kNewImportData,
 };
 
-class ImportPacker : IImportPacker
+class ImportPacker :
+  public IImportPacker
 {
 public:
   ImportPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile) :

@@ -4,6 +4,7 @@
 #include "import_packer.h"
 #include <iostream>
 
+
 uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
@@ -131,6 +132,25 @@ void ReplaceContainerData(OutFileBufferType& outFileBuffer, OffsetType rawOffset
 }
 
 //==================================================================================
+
+NewPEBuilder::NewPEBuilder(
+  PeFilePtr& srcPeFile
+  , const std::vector<uint8_t>& sourceFileBuff
+  , const std::vector<RequiredDataBlock>& additionalSizeRequest
+  , IImportPacker* pImportPacker
+  , IStubPacker* pStubPacker
+  , ISectionsPacker* pSectionsPacker):
+  srcPeFile_(srcPeFile)
+  , sourceFileBuff_(sourceFileBuff)
+  , additionalSizeRequest_(additionalSizeRequest)
+  , importPacker_(pImportPacker)
+  , stubPacker_(pStubPacker)
+  , sectionsPacker_(pSectionsPacker)
+{
+  newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
+  // new import RVA passed here
+  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks);
+}
 
 Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
 {

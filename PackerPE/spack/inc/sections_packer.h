@@ -3,7 +3,8 @@
 #include "includes.h"
 #include "isections_packer.h"
 
-class SectionsPacker: ISectionsPacker
+class SectionsPacker:
+  public ISectionsPacker
 {
 public:
   SectionsPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):

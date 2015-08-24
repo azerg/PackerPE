@@ -80,19 +80,12 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     auto stubRequiredBlocks = stubPacker.GetRequiredDataBlocks();
     std::move(stubRequiredBlocks.begin(), stubRequiredBlocks.end(), std::back_inserter(additionalSizeRequest));
 
-    //-----------------------------------------------------
-
     SectionsPacker sectionsPacker(pef);
-    auto sectionsArr = sectionsPacker.ProcessExecutable(sourceFileBuff, additionalSizeRequest);
-
-    //-----------------------------------------------------
-
-    auto importsArr = importPacker.ProcessExecutable(sectionsArr.additionalDataBlocks); // new import RVA passed here
 
     //-----------------------------------------------------
     // generating output file contents
 
-    NewPEBuilder newPEBuilder(sectionsArr, importsArr, pef, sourceFileBuff);
+    NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker);
 
     auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
 

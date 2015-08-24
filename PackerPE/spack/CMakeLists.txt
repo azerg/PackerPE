@@ -9,4 +9,5 @@ include_directories(${BOOST_INCLUDEDIR} ${PELIB_ROOT} "inc" ${expected_cmn} ${co
 
 add_executable(${SOLUTION_NAME} ${MainProjSrc} ${MainProjInc})
 
+add_definitions(-DNOMINMAX) # remove nasty min max macro
 target_link_libraries(${SOLUTION_NAME} pelib common ${Boost_LIBRARIES})
