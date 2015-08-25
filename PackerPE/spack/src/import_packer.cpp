@@ -6,8 +6,8 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports()
 {
   PeLib::ImportDirectory<bits> newImp;
 
-  newImp.addFunction("kernel32.dll", "CreateFileW");
-  newImp.addFunction("kernel32.dll", "CreateFileA");
+  newImp.addFunction("kernel32.dll", "LoadLibraryA");
+  newImp.addFunction("kernel32.dll", "GetProcAddress");
 
   return newImp;
 }
@@ -51,7 +51,7 @@ private:
   PeLib::dword newImportTableRVA_;
 };
 
-ImportsArr ImportPacker::ProcessExecutable(const decltype(SectionsArr::additionalDataBlocks)& additionalDataBlocks)
+ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks)
 {
   // pick last section VA to use it as new imports VA
   auto additionalImportsBlock = std::find_if(

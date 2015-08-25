@@ -27,5 +27,5 @@ public:
     IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable(const decltype(SectionsArr::additionalDataBlocks)& additionalDataBlocks) = 0;
+  virtual ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks) = 0;
 };

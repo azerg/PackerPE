@@ -2,6 +2,7 @@
 
 #include "new_pe_builder.h"
 #include "import_packer.h"
+#include "common_utils.h"
 #include <iostream>
 
 
@@ -118,20 +119,6 @@ private:
 };
 
 //==================================================================================
-template <class OutFileBufferType, class OffsetType, class NewImportsContainerType>
-void ReplaceContainerData(OutFileBufferType& outFileBuffer, OffsetType rawOffset, NewImportsContainerType& new_imports)
-{
-  // removing preallocated buffer
-  outFileBuffer.erase(
-    outFileBuffer.begin() + rawOffset
-    , outFileBuffer.begin() + rawOffset + new_imports.size());
-  // inserting new import data
-  outFileBuffer.insert(
-    outFileBuffer.begin() + rawOffset
-    , new_imports.cbegin(), new_imports.cend());
-}
-
-//==================================================================================
 
 NewPEBuilder::NewPEBuilder(
   PeFilePtr& srcPeFile
@@ -170,11 +157,11 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   //--------------------------------------------------------------------------------
   // insert imports data
 
-  decltype(newSections_.additionalDataBlocks) importsBlocks;
-  auto importBlocks = std::copy_if(
+  AdditionalDataBlocksType importsBlocks;
+  std::copy_if(
     newSections_.additionalDataBlocks.cbegin()
     , newSections_.additionalDataBlocks.cend()
-    , importsBlocks.begin()
+    , std::back_inserter(importsBlocks)
     , [](const auto& block)->auto
   {
     return block.ownerType == PackerType::kImportPacker;
@@ -184,12 +171,12 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   {
     if (importBlock.packerParam == (int32_t)ImportBlockTypes::kNewImportData)
     {
-      ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.new_imports);
+      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.new_imports);
     }
     else
-    if (importBlock.packerParam == (int32_t)ImportBlockTypes::kNewImportData)
+    if (importBlock.packerParam == (int32_t)ImportBlockTypes::kOldImportData)
     {
-      ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.old_imports);
+      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.old_imports);
     }
     else
     {
@@ -198,6 +185,8 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   }
 
   //--------------------------------------------------------------------------------
+  // Insert stub data
+  stubPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
 
   return outFileBuffer;
 }

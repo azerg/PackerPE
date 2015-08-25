@@ -1,7 +1,25 @@
 //
 #include <PeLibAux.h>
+#include "common_utils.h"
 #include "stub_packer.h"
 
-void StubPacker::ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const stub::STUB_DATA stubData)
+void StubPacker::ProcessExecutable(
+  std::vector<uint8_t>& outFileBuffer
+  , const AdditionalDataBlocksType& additionalDataBlocks)
 {
+  AdditionalDataBlocksType preallocatedBlocks;
+  std::copy_if(
+    additionalDataBlocks.cbegin()
+    , additionalDataBlocks.cend()
+    , std::back_inserter(preallocatedBlocks)
+    , [](const auto& block)->auto
+  {
+    return block.ownerType == PackerType::kStubPacker;
+  });
+
+  assert(preallocatedBlocks.size() == 1);
+
+  auto stubBlock = preallocatedBlocks.front();
+
+  //utils::ReplaceContainerData(outFileBuffer, stubBlock.rawOffset, this->stubData_);
 }

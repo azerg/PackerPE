@@ -31,3 +31,6 @@ public:
     const std::vector<uint8_t>& sourceFileBuff
     , const std::vector<RequiredDataBlock> additionalSizeRequest) = 0;
 };
+
+
+typedef decltype(SectionsArr::additionalDataBlocks) AdditionalDataBlocksType;

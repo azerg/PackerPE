@@ -11,7 +11,9 @@ public:
     IStubPacker(srcPEFile)
   {}
   virtual ~StubPacker() {};
-  virtual void ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const stub::STUB_DATA stubData);
+  virtual void ProcessExecutable(
+    std::vector<uint8_t>& sourceFileBuff
+    , const AdditionalDataBlocksType& additionalDataBlocks);
   Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const
   {

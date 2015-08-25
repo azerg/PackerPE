@@ -5,6 +5,7 @@
 #include <list>
 #include "includes.h"
 #include "ipacker_base.h"
+#include "isections_packer.h"
 #include "stub_data.h"
 
 class IStubPacker:
@@ -15,5 +16,11 @@ public:
     IPackerBase(srcPEFile, PackerType::kStubPacker)
   {}
   virtual ~IStubPacker(){};
-  virtual void ProcessExecutable(const std::vector<uint8_t>& sourceFileBuff, const stub::STUB_DATA stubData) = 0;
+  virtual void ProcessExecutable(
+    std::vector<uint8_t>& sourceFileBuff
+    , const AdditionalDataBlocksType& additionalDataBlocks) = 0;
+  virtual stub::STUB_DATA& GetStubData(){ return stubData_; }
+
+protected:
+  stub::STUB_DATA stubData_;
 };
