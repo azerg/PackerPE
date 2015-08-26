@@ -7,7 +7,7 @@ namespace stub
   // todo(azerg) redesign for x64 & x86 etc. required
   typedef struct STUB_DATA_
   {
-    pointer_t pLoadLibrary;
+    pointer_t pLoadLibrary; // <-- IAT should point here in Alpha
     pointer_t pGetProcAddress;
     pointer_t pRtlDecompressBuffer;
     DWORD unused_iatnull_1;
@@ -15,6 +15,6 @@ namespace stub
     DWORD dwOriginalEP;
     DWORD dwOriIAT;
     DWORD dwOriginalIVA;        //Original Virtual Address Of Import
-    DWORD dwOriginalIS;          //Original Size Of Import
+    DWORD dwOriginalIS;         //Original Size Of Import
   }STUB_DATA, *PSTUB_DATA;
 } // namespace stub

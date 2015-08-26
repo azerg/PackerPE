@@ -14,6 +14,7 @@ class IStubPacker:
 public:
   IStubPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
     IPackerBase(srcPEFile, PackerType::kStubPacker)
+    , stubData_{}
   {}
   virtual ~IStubPacker(){};
   virtual void ProcessExecutable(

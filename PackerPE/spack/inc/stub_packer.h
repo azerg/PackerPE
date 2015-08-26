@@ -21,4 +21,8 @@ public:
     result.push_back({sizeof(stub::STUB_DATA), PackerType::kStubPacker});
     return result;
   }
+private:
+  std::vector<uint8_t> InititalizeStub(
+    std::vector<uint8_t>& sourceFileBuff
+    , const AdditionalDataBlocksType& additionalDataBlocks);
 };
