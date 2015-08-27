@@ -35,10 +35,12 @@ public:
     std::vector<uint8_t>& outFileBuffer
     , const SectionsArr& newSections
     , const ImportsArr& newImports
+    , IStubPacker* stubPacker
     , uint32_t& offset) :
     outFileBuffer_(outFileBuffer)
     , newSections_(newSections)
     , newImports_(newImports)
+    , stubPacker_(stubPacker)
     , offset_(offset)
   {}
   virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file); }
@@ -115,6 +117,7 @@ private:
   std::vector<uint8_t>& outFileBuffer_;
   const SectionsArr& newSections_;
   const ImportsArr& newImports_;
+  IStubPacker* stubPacker_;
   uint32_t& offset_;
 };
 
@@ -144,7 +147,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   std::vector<uint8_t> outFileBuffer;
   auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
-  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
+  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, stubPacker_, offset);
   srcPeFile_->visit(peVisitor);
 
   //--------------------------------------------------------------------------------

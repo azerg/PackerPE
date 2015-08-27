@@ -32,7 +32,6 @@ private:
   stub::STUB_DATA& stubData_;
 };
 
-
 void StubPacker::ProcessExecutable(
   std::vector<uint8_t>& outFileBuffer
   , const AdditionalDataBlocksType& additionalDataBlocks)
