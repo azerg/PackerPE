@@ -27,6 +27,24 @@ uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer,
 }
 
 //==============================================================================
+template <PackerType ownerTypeId, class newSetionsType>
+auto GetAdditionalDataBlocks(const newSetionsType& newSections)
+{
+  auto targetBlocks = std::find_if(
+    newSections.additionalDataBlocks.cbegin()
+    , newSections.additionalDataBlocks.cend()
+    , [](const auto& block)->auto
+  {
+    return block.ownerType == ownerTypeId;
+  });
+
+  if (targetBlocks == newSections.additionalDataBlocks.cend())
+  {
+    throw std::runtime_error("Cant find new required data block");
+  }
+
+  return targetBlocks;
+}
 
 class RebuildPeHeaderVisitor : public PeLib::PeFileVisitor
 {
@@ -35,12 +53,10 @@ public:
     std::vector<uint8_t>& outFileBuffer
     , const SectionsArr& newSections
     , const ImportsArr& newImports
-    , IStubPacker* stubPacker
     , uint32_t& offset) :
     outFileBuffer_(outFileBuffer)
     , newSections_(newSections)
     , newImports_(newImports)
-    , stubPacker_(stubPacker)
     , offset_(offset)
   {}
   virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file); }
@@ -73,20 +89,14 @@ private:
     }
 
     // update PE-file with new import data
-    auto importBlock = std::find_if(
-      newSections_.additionalDataBlocks.cbegin()
-      , newSections_.additionalDataBlocks.cend()
-      ,[](const auto& block)->auto
-    {
-      return block.ownerType == PackerType::kImportPacker;
-    });
-
-    if (importBlock == newSections_.additionalDataBlocks.cend())
-    {
-      throw std::runtime_error("Cant find new import block");
-    }
+    auto importBlock = GetAdditionalDataBlocks<PackerType::kImportPacker>(newSections_);
     nPeh.setIddImportRva(importBlock->virtualOffset);
     nPeh.setIddImportSize(importBlock->size);
+
+    // update PE-file with new IAT address, pointer to our Stub structure, allocated in new file.
+    auto stubBlock = GetAdditionalDataBlocks<PackerType::kStubPacker>(newSections_);
+    //nPeh.setIddIatRva(stubBlock->virtualOffset);
+    //nPeh.setIddIatSize(16); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
 
     //--------------------------------------------------------------------------------
     // Updating SizeOfImage
@@ -117,7 +127,6 @@ private:
   std::vector<uint8_t>& outFileBuffer_;
   const SectionsArr& newSections_;
   const ImportsArr& newImports_;
-  IStubPacker* stubPacker_;
   uint32_t& offset_;
 };
 
@@ -147,7 +156,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   std::vector<uint8_t> outFileBuffer;
   auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
-  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, stubPacker_, offset);
+  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
   srcPeFile_->visit(peVisitor);
 
   //--------------------------------------------------------------------------------
