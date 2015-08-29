@@ -17,4 +17,6 @@ namespace stub
     DWORD dwOriginalIVA;        //Original Virtual Address Of Import
     DWORD dwOriginalIS;         //Original Size Of Import
   }STUB_DATA, *PSTUB_DATA;
+
+  #define STUB_IAT_SIZE 16
 } // namespace stub

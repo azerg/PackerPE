@@ -42,7 +42,6 @@ auto GetAdditionalDataBlocks(const newSetionsType& newSections)
   {
     throw std::runtime_error("Cant find new required data block");
   }
-
   return targetBlocks;
 }
 
@@ -96,7 +95,7 @@ private:
     // update PE-file with new IAT address, pointer to our Stub structure, allocated in new file.
     auto stubBlock = GetAdditionalDataBlocks<PackerType::kStubPacker>(newSections_);
     nPeh.setIddIatRva(stubBlock->virtualOffset);
-    nPeh.setIddIatSize(16); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
+    nPeh.setIddIatSize(STUB_IAT_SIZE); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
 
     //--------------------------------------------------------------------------------
     // Updating SizeOfImage

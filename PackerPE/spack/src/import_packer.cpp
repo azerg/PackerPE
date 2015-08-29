@@ -2,13 +2,16 @@
 #include "import_packer.h"
 
 template <int bits>
-PeLib::ImportDirectory<bits> GenerateDefaultImports()
+PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA)
 {
   PeLib::ImportDirectory<bits> newImp;
 
   newImp.addFunction("kernel32.dll", "LoadLibraryA");
   newImp.addFunction("kernel32.dll", "GetProcAddress");
   newImp.addFunction("ntdll.dll", "RtlDecompressBuffer");
+
+  newImp.setFirstThunk(0, PeLib::NEWDIR, stubDataRVA); // first 2 items are kernel32 libs
+  newImp.setFirstThunk(1, PeLib::NEWDIR, stubDataRVA + sizeof(PeLib::dword) * 2); // 3rd item is one from ntdll
 
   return newImp;
 }
@@ -17,7 +20,8 @@ template<int bits>
 void dumpImportDirectory(
   PeLib::PeFile& peFile
   , ImportsArr& importOut
-  , PeLib::dword newImportTableRVA)
+  , PeLib::dword newImportTableRVA
+  , PeLib::dword stubDataRVA)
 {
   if (peFile.readImportDirectory() != PeLib::NO_ERROR)
   {
@@ -28,28 +32,30 @@ void dumpImportDirectory(
   imp.rebuild(importOut.old_imports, 0);
 
   // filling new import table
-  auto newImp = GenerateDefaultImports<bits>();
+  auto newImp = GenerateDefaultImports<bits>(stubDataRVA);
   newImp.rebuild(importOut.new_imports, newImportTableRVA);
 }
 
 class DumpImportsVisitor : public PeLib::PeFileVisitor
 {
 public:
-  DumpImportsVisitor(ImportsArr& importOut, PeLib::dword newImportTableRVA):
+  DumpImportsVisitor(ImportsArr& importOut, PeLib::dword newImportTableRVA, PeLib::dword stubRVA):
     importOut_(importOut)
     , newImportTableRVA_(newImportTableRVA)
+    , stubRVA_(stubRVA)
   {}
   virtual void callback(PeLib::PeFile32& file)
   {
-    dumpImportDirectory<32>(file, importOut_, newImportTableRVA_);
+    dumpImportDirectory<32>(file, importOut_, newImportTableRVA_, stubRVA_);
   }
   virtual void callback(PeLib::PeFile64& file)
   {
-    dumpImportDirectory<64>(file, importOut_, newImportTableRVA_);
+    dumpImportDirectory<64>(file, importOut_, newImportTableRVA_, stubRVA_);
   }
 private:
   ImportsArr& importOut_;
   PeLib::dword newImportTableRVA_;
+  PeLib::dword stubRVA_;
 };
 
 ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks)
@@ -64,9 +70,16 @@ ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& addit
       valIt.packerParam == ( int32_t )ImportBlockTypes::kNewImportData;
   });
 
-  auto newImportTableRVA = 0;
+  auto additionalStubDataBlock = std::find_if(
+    additionalDataBlocks.begin()
+    , additionalDataBlocks.end()
+    , [&](auto& valIt)
+  {
+    return valIt.ownerType == PackerType::kStubPacker;
+  });
 
-  if (additionalImportsBlock != additionalDataBlocks.end())
+  auto newImportTableRVA = 0;
+  if (additionalImportsBlock != additionalDataBlocks.end() && additionalStubDataBlock != additionalDataBlocks.end())
   {
     newImportTableRVA = additionalImportsBlock->virtualOffset;
   }
@@ -76,7 +89,7 @@ ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& addit
   }
 
   ImportsArr importsData;
-  DumpImportsVisitor importsVisitor(importsData, newImportTableRVA);
+  DumpImportsVisitor importsVisitor(importsData, newImportTableRVA, additionalStubDataBlock->virtualOffset);
   srcPEFile_->visit(importsVisitor);
 
   return importsData;
@@ -86,7 +99,7 @@ std::vector<RequiredDataBlock> ImportPacker::GetRequiredDataBlocks() const
 {
   ImportsArr importsData;
 
-  DumpImportsVisitor importsVisitor(importsData, 0);
+  DumpImportsVisitor importsVisitor(importsData, 0, 0);
   srcPEFile_->visit(importsVisitor);
 
   std::vector<RequiredDataBlock> result;
