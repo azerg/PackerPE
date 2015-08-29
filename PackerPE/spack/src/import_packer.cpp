@@ -8,6 +8,7 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports()
 
   newImp.addFunction("kernel32.dll", "LoadLibraryA");
   newImp.addFunction("kernel32.dll", "GetProcAddress");
+  newImp.addFunction("ntdll.dll", "RtlDecompressBuffer");
 
   return newImp;
 }

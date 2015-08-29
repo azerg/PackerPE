@@ -63,7 +63,7 @@ public:
   virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file); }
 private:
   template <int bits>
-  void UpdateSizeOfImage(PeLib::PeHeaderT<bits> newPeHeader)
+  void UpdateSizeOfImage(PeLib::PeHeaderT<bits>& newPeHeader)
   {
     auto lastSectionHead = newSections_.sections.back().newHeader;
     newPeHeader.setSizeOfImage(lastSectionHead.VirtualAddress + lastSectionHead.VirtualSize);
@@ -95,8 +95,8 @@ private:
 
     // update PE-file with new IAT address, pointer to our Stub structure, allocated in new file.
     auto stubBlock = GetAdditionalDataBlocks<PackerType::kStubPacker>(newSections_);
-    //nPeh.setIddIatRva(stubBlock->virtualOffset);
-    //nPeh.setIddIatSize(16); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
+    nPeh.setIddIatRva(stubBlock->virtualOffset);
+    nPeh.setIddIatSize(16); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
 
     //--------------------------------------------------------------------------------
     // Updating SizeOfImage

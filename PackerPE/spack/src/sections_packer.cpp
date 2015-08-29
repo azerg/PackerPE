@@ -20,7 +20,8 @@ void AppendRequiredSizeSection(
   //----------------------------------
   // Filling new section header
   
-  strcpy_s(reinterpret_cast<char*>(newSectionHead.Name), sizeof(newSectionHead.Name), ".new\x00\x00\x00\x00");
+  const char newSectionName[] = ".new\x00\x00\x00";
+  memcpy_s(reinterpret_cast<char*>(newSectionHead.Name), sizeof(newSectionHead.Name), newSectionName, sizeof(newSectionName));
   newSectionHead.Characteristics =
     PeLib::PELIB_IMAGE_SCN_MEM_WRITE
     | PeLib::PELIB_IMAGE_SCN_MEM_READ
