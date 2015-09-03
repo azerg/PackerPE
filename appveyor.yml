@@ -15,6 +15,9 @@ configuration:
   - Debug
   - Release
   
+matrix:
+  fast_finish: true
+  
 # lets go	
 init:
   - cmd: cmake --version
@@ -32,7 +35,3 @@ build:
   project: C:\projects\PackerPE\PackerPE\build\spack.sln # path to Visual Studio solution or project
   parallel: true                                         # enable MSBuild parallel builds
   verbosity: minimal                                     # MSBuild verbosity level (quiet|minimal|normal|detailed)
-  
- # dont build all jobs in queue, if one failed
- matrix:
-  fast_finish: true
