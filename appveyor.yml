@@ -12,9 +12,6 @@ environment:
   BOOST_ROOT: C:\Libraries\boost
   BOOST_LIBRARYDIR: C:\Libraries\boost\stage\lib
   BUILD_EXAMPLES: OFF  # don't build examples to not exceed allowed build time (40 min)
-  
-  matrix:
-    - language: cpp
 	
 # lets go	
 init:
