@@ -1,0 +1,39 @@
+# Specify version format
+version: "{build}"
+
+platform:
+  - Win32
+
+configuration:
+  - Debug
+  - Release
+
+environment:
+  BOOST_ROOT: C:\Libraries\boost
+  BOOST_LIBRARYDIR: C:\Libraries\boost\stage\lib
+  BUILD_EXAMPLES: OFF  # don't build examples to not exceed allowed build time (40 min)
+  
+  matrix:
+    - language: cpp
+	
+# lets go	
+init:
+  - cmd: cmake --version
+  - cmd: msbuild /version
+  
+before_build:
+  - if %platform%==Win32 set generator=Visual Studio 14
+  - if %platform%==Win64 set generator=Visual Studio 14 Win64
+  - if %platform%==Win32 set vcplatform=Win32
+  - if %platform%==Win64 set vcplatform=x64
+  - cmd: cd PackerPE
+  - cmake . -B"build" -G"Visual Studio 14" -Wno-dev -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" # --debug-output
+  
+build:
+  project: C:\projects\PackerPE\PackerPE\build\spack.sln # path to Visual Studio solution or project
+  parallel: true                                         # enable MSBuild parallel builds
+  verbosity: minimal                                     # MSBuild verbosity level (quiet|minimal|normal|detailed)
+  
+ # dont build all jobs in queue, if one failed
+ matrix:
+  fast_finish: true

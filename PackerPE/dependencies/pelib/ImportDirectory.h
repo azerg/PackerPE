@@ -110,7 +110,7 @@ namespace PeLib
       /// Read a file's import directory.
       int read(const std::string& strFilename, unsigned int uiOffset, unsigned int uiSize, const PeHeaderT<bits>& pehHeader); // EXPORT
       /// Rebuild the import directory.
-      void rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixEntries = true) const; // EXPORT
+      void rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixFirstChunk = true, bool fixEntries = true) const; // EXPORT
       /// Remove a file from the import directory.
       int removeFile(const std::string& strFilename); // EXPORT
       /// Remove a function from the import directory.
@@ -634,7 +634,7 @@ namespace PeLib
   * \todo uiSizeoffuncnames is not used.
   **/
   template<int bits>
-  void ImportDirectory<bits>::rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixEntries) const
+  void ImportDirectory<bits>::rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixFirstChunk, bool fixEntries) const
   {
     unsigned int uiImprva = dwRva;
     unsigned int uiSizeofdescriptors = (static_cast<unsigned int>(m_vNewiid.size() + m_vOldiid.size()) + 1) * PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
@@ -687,7 +687,7 @@ namespace PeLib
       obBuffer << m_vNewiid[i].impdesc.ForwarderChain;
       dword dwPdll = uiSizeofdescriptors + uiSizeofoft + uiImprva + dllsize;
       obBuffer << (fixEntries ? dwPdll : m_vNewiid[i].impdesc.Name);
-      obBuffer << (fixEntries ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
+      obBuffer << (fixEntries && fixFirstChunk ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
 
       dllsize += static_cast<unsigned int>(m_vNewiid[i].name.size()) + 1;
     }

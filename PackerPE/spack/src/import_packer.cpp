@@ -8,10 +8,11 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA)
 
   newImp.addFunction("kernel32.dll", "LoadLibraryA");
   newImp.addFunction("kernel32.dll", "GetProcAddress");
-  newImp.addFunction("ntdll.dll", "RtlDecompressBuffer");
+  //newImp.addFunction("ntdll.dll", "RtlDecompressBuffer");
+  //newImp.addFunction("user32.dll", "CharNextA");
 
   newImp.setFirstThunk(0, PeLib::NEWDIR, stubDataRVA); // first 2 items are kernel32 libs
-  newImp.setFirstThunk(1, PeLib::NEWDIR, stubDataRVA + sizeof(PeLib::dword) * 2); // 3rd item is one from ntdll
+  //newImp.setFirstThunk(1, PeLib::NEWDIR, stubDataRVA + sizeof(PeLib::dword) * 2); // 3rd item is one from ntdll
 
   return newImp;
 }
@@ -33,7 +34,7 @@ void dumpImportDirectory(
 
   // filling new import table
   auto newImp = GenerateDefaultImports<bits>(stubDataRVA);
-  newImp.rebuild(importOut.new_imports, newImportTableRVA);
+  newImp.rebuild(importOut.new_imports, newImportTableRVA, false);
 }
 
 class DumpImportsVisitor : public PeLib::PeFileVisitor
