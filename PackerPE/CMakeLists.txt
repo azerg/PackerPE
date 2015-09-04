@@ -11,6 +11,7 @@ set(CMAKE_CONFIGURATION_TYPES Release Debug CACHE TYPE INTERNAL FORCE)
 set(common_inc ${CMAKE_HOME_DIRECTORY}/common/inc CACHE TYPE STRING)
 
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}" CACHE TYPE STRING)
+set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR}" CACHE TYPE STRING)
 set(Boost_USE_STATIC_LIBS ON CACHE TYPE BOOL)
 
 ##################################################################################################################
