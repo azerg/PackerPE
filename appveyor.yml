@@ -22,6 +22,7 @@ matrix:
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
+  - cmd: dir C:\Libraries\boost
   
 before_build:
   - if %platform%==Win32 set generator=Visual Studio 14
