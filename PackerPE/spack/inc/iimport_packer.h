@@ -6,6 +6,7 @@
 #include "includes.h"
 #include "ipacker_base.h"
 #include "isections_packer.h"
+#include "istub_packer.h"
 
 struct ImportEntry
 {
@@ -27,5 +28,5 @@ public:
     IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks) = 0;
+  virtual ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate) = 0;
 };

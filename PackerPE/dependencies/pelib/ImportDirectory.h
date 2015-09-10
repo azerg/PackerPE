@@ -215,7 +215,7 @@ namespace PeLib
     ImpDirFileIterator FileIter = std::find_if(m_vNewiid.begin(), m_vNewiid.end(), std::bind2nd(std::mem_fun_ref(&PELIB_IMAGE_IMPORT_DIRECTORY<bits>::operator==), strFilename));
 
     PELIB_IMAGE_IMPORT_DIRECTORY<bits> iid;
-    PELIB_THUNK_DATA<bits> td;
+    PELIB_THUNK_DATA<bits> td{};
     td.fname = strFuncname;
     iid.name = strFilename;
     if (FileIter == m_vNewiid.end())

@@ -147,7 +147,7 @@ NewPEBuilder::NewPEBuilder(
 {
   newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
   // new import RVA passed here
-  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks);
+  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks, stubPacker_->GetStubData());
 }
 
 Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()

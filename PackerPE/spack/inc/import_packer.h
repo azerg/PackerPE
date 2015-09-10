@@ -16,7 +16,7 @@ public:
   ImportPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile) :
     IImportPacker(srcPEFile)
   {}
-  ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks);
+  ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate);
   Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const;
 };
