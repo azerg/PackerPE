@@ -2,19 +2,40 @@
 #include "import_packer.h"
 
 template <int bits>
-PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA, stub::STUB_DATA& stubDataToUpdate)
+PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA)
 {
   PeLib::ImportDirectory<bits> newImp;
 
-  newImp.addFunction("kernel32.dll", "LoadLibraryA");
-  newImp.addFunction("kernel32.dll", "GetProcAddress");
-  //newImp.addFunction("ntdll.dll", "RtlDecompressBuffer");
-  //newImp.addFunction("user32.dll", "CharNextA");
+  struct importName
+  {
+    std::string dllName;
+    std::string funcName;
+  };
+  // todo(azerg): check import ordering here & in stub_data in compile time (fusion?)
+  std::vector<importName> kernelImports{
+    {"kernel32.dll", "LoadLibraryA"},
+    {"kernel32.dll", "GetProcAddress"}
+  };
 
+  std::vector<importName> ntdllImports{
+    {"ntdll.dll", "RtlDecompressBuffer"}
+  };
+
+
+  auto addImportsFromNames = [&newImp](std::vector<importName> imports)
+  {
+    std::for_each(imports.begin(), imports.end(), [&newImp](importName& import)
+    {
+      newImp.addFunction(import.dllName, import.funcName);
+    });
+  };
+
+  addImportsFromNames(kernelImports);
+  addImportsFromNames(ntdllImports);
+
+  // todo(azerg): check import sizes in compile-time (!)
   newImp.setFirstThunk(0, PeLib::NEWDIR, stubDataRVA); // first 2 items are kernel32 libs
-  //newImp.setFirstThunk(1, PeLib::NEWDIR, stubDataRVA + sizeof(PeLib::dword) * 2); // 3rd item is one from ntdll
-
-  // NOW WE SHOULD UPDATE IAT WITH POINTERS TO IMAGE_THUNK_DATA
+  newImp.setFirstThunk(1, PeLib::NEWDIR, stubDataRVA + sizeof(PeLib::dword) * kernelImports.size()); // 3rd item is one from ntdll
 
   return newImp;
 }
@@ -36,8 +57,8 @@ void dumpImportDirectory(
   imp.rebuild(importOut.old_imports, 0);
 
   // filling new import table
-  auto newImp = GenerateDefaultImports<bits>(stubDataRVA, stubDataToUpdate);
-  newImp.rebuild(importOut.new_imports, newImportTableRVA, false);
+  auto newImp = GenerateDefaultImports<bits>(stubDataRVA);
+  newImp.rebuild(importOut.new_imports, newImportTableRVA, reinterpret_cast<PeLib::dword*>(&stubDataToUpdate));
 }
 
 class DumpImportsVisitor : public PeLib::PeFileVisitor
