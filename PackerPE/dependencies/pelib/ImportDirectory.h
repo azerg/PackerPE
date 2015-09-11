@@ -110,7 +110,7 @@ namespace PeLib
       /// Read a file's import directory.
       int read(const std::string& strFilename, unsigned int uiOffset, unsigned int uiSize, const PeHeaderT<bits>& pehHeader); // EXPORT
       /// Rebuild the import directory.
-      void rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixFirstChunk = true, bool fixEntries = true) const; // EXPORT
+      void rebuild(std::vector<byte>& vBuffer, dword dwRva, dword* pIAT = nullptr, bool fixEntries = true) const; // EXPORT
       /// Remove a file from the import directory.
       int removeFile(const std::string& strFilename); // EXPORT
       /// Remove a function from the import directory.
@@ -631,10 +631,11 @@ namespace PeLib
   * Rebuilds the import directory.
   * @param vBuffer Buffer the rebuilt import directory will be written to.
   * @param dwRva The RVA of the ImportDirectory in the file.
+  * @param pIAT - if not null, rebuild fills iat with uiPfunc addresses
   * \todo uiSizeoffuncnames is not used.
   **/
   template<int bits>
-  void ImportDirectory<bits>::rebuild(std::vector<byte>& vBuffer, dword dwRva, bool fixFirstChunk, bool fixEntries) const
+  void ImportDirectory<bits>::rebuild(std::vector<byte>& vBuffer, dword dwRva, dword* pIAT, bool fixEntries) const
   {
     unsigned int uiImprva = dwRva;
     unsigned int uiSizeofdescriptors = (static_cast<unsigned int>(m_vNewiid.size() + m_vOldiid.size()) + 1) * PELIB_IMAGE_IMPORT_DESCRIPTOR::size();
@@ -687,7 +688,7 @@ namespace PeLib
       obBuffer << m_vNewiid[i].impdesc.ForwarderChain;
       dword dwPdll = uiSizeofdescriptors + uiSizeofoft + uiImprva + dllsize;
       obBuffer << (fixEntries ? dwPdll : m_vNewiid[i].impdesc.Name);
-      obBuffer << (fixEntries && fixFirstChunk ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
+      obBuffer << (fixEntries && pIAT != nullptr ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
 
       dllsize += static_cast<unsigned int>(m_vNewiid[i].name.size()) + 1;
     }
@@ -713,8 +714,10 @@ namespace PeLib
         else
         {
           obBuffer << uiPfunc;
+          *pIAT = uiPfunc;
         }
         uiPfunc += static_cast<unsigned int>(m_vNewiid[i].originalfirstthunk[j].fname.size()) + 3;
+        ++pIAT;
       }
       obBuffer << (dword)0;
     }
