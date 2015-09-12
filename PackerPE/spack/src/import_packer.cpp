@@ -21,7 +21,6 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA)
     {"ntdll.dll", "RtlDecompressBuffer"}
   };
 
-
   auto addImportsFromNames = [&newImp](std::vector<importName> imports)
   {
     std::for_each(imports.begin(), imports.end(), [&newImp](importName& import)

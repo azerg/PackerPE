@@ -12,6 +12,7 @@ set(InterfacesInc
 	${PRJ_DIR}/inc/ipacker_base.h
 	${PRJ_DIR}/inc/isections_packer.h
 	${PRJ_DIR}/inc/istub_packer.h
+	${PRJ_DIR}/inc/iloader_packer.h
 )
 source_group("Header Files\\interfaces" FILES ${InterfacesInc})
 

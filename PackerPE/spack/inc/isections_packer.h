@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <cstdint>
 #include <list>
 #include "includes.h"
 #include "ipacker_base.h"

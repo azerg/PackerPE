@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
 #include <vector>
-#include <cstdint>
 #include "includes.h"
 #include "ipacker_base.h"
 #include "isections_packer.h"

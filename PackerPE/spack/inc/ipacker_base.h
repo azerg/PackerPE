@@ -7,6 +7,7 @@ enum class PackerType
   kImportPacker,
   kSectionsPacker,
   kStubPacker,
+  kLoaderPacker,
 };
 
 /*!
