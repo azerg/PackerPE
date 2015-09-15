@@ -12,12 +12,12 @@ PeLib::ImportDirectory<bits> GenerateDefaultImports(PeLib::dword stubDataRVA)
     std::string funcName;
   };
   // todo(azerg): check import ordering here & in stub_data in compile time (fusion?)
-  std::vector<importName> kernelImports{
+  static std::vector<importName> kernelImports{
     {"kernel32.dll", "LoadLibraryA"},
     {"kernel32.dll", "GetProcAddress"}
   };
 
-  std::vector<importName> ntdllImports{
+  static std::vector<importName> ntdllImports{
     {"ntdll.dll", "RtlDecompressBuffer"}
   };
 

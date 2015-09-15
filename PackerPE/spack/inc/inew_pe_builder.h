@@ -4,6 +4,7 @@
 #include "iimport_packer.h"
 #include "isections_packer.h"
 #include "istub_packer.h"
+#include "iloader_packer.h"
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
 

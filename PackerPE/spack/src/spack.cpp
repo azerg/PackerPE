@@ -9,6 +9,7 @@
 #include "sections_packer.h"
 #include "import_packer.h"
 #include "stub_packer.h"
+#include "loader_packer.h"
 #include "new_pe_builder.h"
 #include "file_utils.h"
 #include "tiny_logger.h"
@@ -76,6 +77,12 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
 
     //-----------------------------------------------------
 
+    LoaderPacker loaderPacker(pef);
+    auto requiredLoaderBlock = loaderPacker.GetRequiredDataBlocks();
+    std::move(requiredLoaderBlock.begin(), requiredLoaderBlock.end(), std::back_inserter(additionalSizeRequest));
+
+    //-----------------------------------------------------
+
     StubPacker stubPacker(pef);
     auto stubRequiredBlocks = stubPacker.GetRequiredDataBlocks();
     std::move(stubRequiredBlocks.begin(), stubRequiredBlocks.end(), std::back_inserter(additionalSizeRequest));
@@ -85,7 +92,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     //-----------------------------------------------------
     // generating output file contents
 
-    NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker);
+    NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker, &loaderPacker);
 
     auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
 

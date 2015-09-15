@@ -12,7 +12,8 @@ public:
     , const std::vector<RequiredDataBlock>& additionalSizeRequest
     , IImportPacker* pImportPacker
     , IStubPacker* pStubPacker
-    , ISectionsPacker* pSectionsPacker);
+    , ISectionsPacker* pSectionsPacker
+    , ILoaderPacker* pLoaderPacker);
 
   Expected<std::vector<uint8_t>> GenerateOutputPEFile();
 
@@ -20,6 +21,7 @@ private:
   IImportPacker* importPacker_;
   IStubPacker* stubPacker_;
   ISectionsPacker* sectionsPacker_;
+  ILoaderPacker* loaderPacker_;
   const std::vector<uint8_t>& sourceFileBuff_;
   const std::vector<RequiredDataBlock>& additionalSizeRequest_;
   PeFilePtr& srcPeFile_;

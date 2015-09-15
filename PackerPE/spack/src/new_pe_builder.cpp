@@ -137,13 +137,15 @@ NewPEBuilder::NewPEBuilder(
   , const std::vector<RequiredDataBlock>& additionalSizeRequest
   , IImportPacker* pImportPacker
   , IStubPacker* pStubPacker
-  , ISectionsPacker* pSectionsPacker):
+  , ISectionsPacker* pSectionsPacker
+  , ILoaderPacker* pLoaderPacker):
   srcPeFile_(srcPeFile)
   , sourceFileBuff_(sourceFileBuff)
   , additionalSizeRequest_(additionalSizeRequest)
   , importPacker_(pImportPacker)
   , stubPacker_(pStubPacker)
   , sectionsPacker_(pSectionsPacker)
+  , loaderPacker_(pLoaderPacker)
 {
   newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
   // new import RVA passed here
@@ -198,6 +200,11 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   //--------------------------------------------------------------------------------
   // Insert stub data
   stubPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
+
+  //--------------------------------------------------------------------------------
+  // Insert loader data
+
+  loaderPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
 
   return outFileBuffer;
 }
