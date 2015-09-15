@@ -25,7 +25,7 @@ init:
   - cmd: msbuild /version  
   
 install:
-  - dir C:\Libraries\boost_1_59_0\lib32-msvc-14.0
+  - dir C:\Libraries
   
 before_build:
   - if %platform%==Win32 set generator=Visual Studio 14
