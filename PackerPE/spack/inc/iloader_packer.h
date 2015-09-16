@@ -18,7 +18,7 @@ struct LoaderInfo
   PlatformType platformType;
 };
 
-static std::vector<LoaderInfo> gloadersNames{{"loader_x86.stub", PlatformType::x86}, {"loader_x86.stub", PlatformType::x64}}; // dup data here just for testing of two loaders :D
+static std::vector<LoaderInfo> gloadersNames{{"stub_x86.bin", PlatformType::x86}, {"stub_x86.bin", PlatformType::x64}}; // dup data here just for testing of two loaders :D
 
 class ILoaderPacker:
   public IPackerBase

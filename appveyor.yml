@@ -5,10 +5,12 @@ os: Visual Studio 2015
 
 platform:
   - Win32
+  - x64
 
 environment:
   BOOST_ROOT: C:\Libraries\boost_1_59_0
   BOOST_LIBRARYDIR: C:\Libraries\boost_1_59_0\lib32-msvc-14.0
+  BOOST_LIBRARYDIR64: C:\Libraries\boost_1_59_0\lib64-msvc-14.0
   BUILD_EXAMPLES: OFF  # don't build examples to not exceed allowed build time (40 min)
 
 configuration:
@@ -16,7 +18,7 @@ configuration:
   - Release
   
 matrix:
-  fast_finish: true
+  fast_finish: false
   
 #----------------------------------------------------------------------------------------  
 # lets go	
@@ -24,16 +26,14 @@ init:
   - cmd: cmake --version
   - cmd: msbuild /version  
   
-install:
-  - dir C:\Libraries
-  
 before_build:
   - if %platform%==Win32 set generator=Visual Studio 14
-  - if %platform%==Win64 set generator=Visual Studio 14 Win64
+  - if %platform%==x64 set generator=Visual Studio 14 Win64
   - if %platform%==Win32 set vcplatform=Win32
-  - if %platform%==Win64 set vcplatform=x64
+  - if %platform%==x64 set vcplatform=x64
+  - if %platform%==x64 set BOOST_LIBRARYDIR=%BOOST_LIBRARYDIR64%
   - cmd: cd PackerPE
-  - cmake . -B"build" -G"Visual Studio 14" -Wno-dev -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" --debug-output -DBoost_DEBUG=ON
+  - cmake . -B"build" -G"%generator%" -Wno-dev -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"
   
 build:
   project: C:\projects\PackerPE\PackerPE\build\spack.sln # path to Visual Studio solution or project

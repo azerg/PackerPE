@@ -25,6 +25,7 @@ void AppendRequiredSizeSection(
   newSectionHead.Characteristics =
     PeLib::PELIB_IMAGE_SCN_MEM_WRITE
     | PeLib::PELIB_IMAGE_SCN_MEM_READ
+    | PeLib::PELIB_IMAGE_SCN_MEM_EXECUTE
     | PeLib::PELIB_IMAGE_SCN_CNT_INITIALIZED_DATA
     | PeLib::PELIB_IMAGE_SCN_CNT_CODE;
 
