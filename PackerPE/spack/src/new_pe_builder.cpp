@@ -97,6 +97,10 @@ private:
     nPeh.setIddIatRva(stubBlock->virtualOffset);
     nPeh.setIddIatSize(STUB_IAT_SIZE); // todo(aserg) REPLACE THIS WITH VALID IAT SIZE, DETECTED IN COMPILE-TIME !!!!!!
 
+    // update EntryPoint with address of our loader
+    auto loaderBlock = GetAdditionalDataBlocks<PackerType::kLoaderPacker>(newSections_);
+    nPeh.setAddressOfEntryPoint(loaderBlock->virtualOffset);
+
     //--------------------------------------------------------------------------------
     // Updating SizeOfImage
     
@@ -170,15 +174,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   //--------------------------------------------------------------------------------
   // insert imports data
 
-  AdditionalDataBlocksType importsBlocks;
-  std::copy_if(
-    newSections_.additionalDataBlocks.cbegin()
-    , newSections_.additionalDataBlocks.cend()
-    , std::back_inserter(importsBlocks)
-    , [](const auto& block)->auto
-  {
-    return block.ownerType == PackerType::kImportPacker;
-  });
+  auto importsBlocks = utils::GetAdditionalBlocks(newSections_.additionalDataBlocks, PackerType::kImportPacker);
 
   for (auto& importBlock: importsBlocks)
   {

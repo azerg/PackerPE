@@ -15,20 +15,31 @@ LoaderPacker::LoaderPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile):
   ILoaderPacker(srcPEFile, GetLoadersPath())
 {}
 
+int32_t GetStubDataOffset(const AdditionalDataBlocksType& additionalDataBlocks)
+{
+  auto stubBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kStubPacker);
+  auto loaderBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kLoaderPacker);
+
+  return loaderBlock.virtualOffset - stubBlock.virtualOffset;
+}
+
+// this function is used to save offset to stubData somewhere in loader :D
+void ModifyLoaderWithStubDataInfo(std::vector<PeLib::byte>& inOutLoaderBuff, const AdditionalDataBlocksType& additionalDataBlocks)
+{
+  auto stubDataOffset = GetStubDataOffset(additionalDataBlocks);
+
+  //todo(azerg): do smth with this
+  const auto loaderCaveOffset = 8;
+
+  // add caveOffset to stubDataOffset to get stubData easily from loader
+  stubDataOffset += loaderCaveOffset;
+
+  *reinterpret_cast<int32_t*>(&inOutLoaderBuff.at(loaderCaveOffset)) = stubDataOffset;
+}
+
 void LoaderPacker::ProcessExecutable(std::vector<uint8_t>& outFileBuffer, const AdditionalDataBlocksType& additionalDataBlocks)
 {
-  AdditionalDataBlocksType preallocatedBlocks;
-  std::copy_if(
-    additionalDataBlocks.cbegin()
-    , additionalDataBlocks.cend()
-    , std::back_inserter(preallocatedBlocks)
-    , [](const auto& block)->auto
-  {
-    return block.ownerType == PackerType::kLoaderPacker;
-  });
-
-  assert(preallocatedBlocks.size() == 1);
-  auto loaderBlock = preallocatedBlocks.front();
+  auto loaderBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kLoaderPacker);
 
   // get type of source executable
   PlatformType platformType;
@@ -73,6 +84,9 @@ void LoaderPacker::ProcessExecutable(std::vector<uint8_t>& outFileBuffer, const 
   pbuf->sgetn(reinterpret_cast<char*>(loaderData.data()), size);
 
   loaderFile.close();
+
+  // get stub data offset to update loader code with pointer to stub data ( link stubData to loader )
+  ModifyLoaderWithStubDataInfo(loaderData, additionalDataBlocks);
 
   utils::ReplaceContainerData(outFileBuffer, loaderBlock.rawOffset, loaderData);
 }

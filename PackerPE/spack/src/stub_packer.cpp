@@ -36,19 +36,7 @@ void StubPacker::ProcessExecutable(
   std::vector<uint8_t>& outFileBuffer
   , const AdditionalDataBlocksType& additionalDataBlocks)
 {
-  AdditionalDataBlocksType preallocatedBlocks;
-  std::copy_if(
-    additionalDataBlocks.cbegin()
-    , additionalDataBlocks.cend()
-    , std::back_inserter(preallocatedBlocks)
-    , [](const auto& block)->auto
-  {
-    return block.ownerType == PackerType::kStubPacker;
-  });
-
-  assert(preallocatedBlocks.size() == 1);
-
-  auto stubBlock = preallocatedBlocks.front();
+  auto stubBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kStubPacker);
 
   auto stubDataVt = InititalizeStub(outFileBuffer, additionalDataBlocks); // fill stub values
   

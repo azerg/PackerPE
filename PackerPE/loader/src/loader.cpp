@@ -7,13 +7,25 @@
 int StubEP()
 {
   stub::PSTUB_DATA pStubData;
+  __asm{
+    jmp __data_raw_end
+  __data_raw:
+    nop // <-- packer will write RVA of stub data here
+    nop
+    nop
+    nop
+  __data_raw_end:
+    lea eax, __data_raw
+    mov ecx, eax // save stubDataOffset
+    add eax, ecx
+    mov pStubData, eax
+  }
 
   // get address of STUB_DATA
   // we know that it's located straight before our code.
   __asm {
-      int 3
     call __getmyaddr
-      __getmyaddr :
+__getmyaddr :
     pop eax
       and eax, 0xFFFFF000 // We know that address of structure is the address of section.
                           // section addr aligned to 0x1000
@@ -24,7 +36,7 @@ int StubEP()
   __asm {
     mov eax, FS:[0x30];
     mov Peb, eax
-      nop
+    nop
   }
 
   pStubData->dwOriginalEP += Peb->ImageBaseAddress;
