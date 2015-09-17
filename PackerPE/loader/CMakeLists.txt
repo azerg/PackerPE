@@ -24,4 +24,12 @@ add_definitions(-DNDEBUG)  # no debug flag
 string(REPLACE "/debug" "" CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG})        # removing debug info from Debug build!!
 string(REPLACE "/debug" "" CMAKE_SHARED_LINKER_FLAGS_DEBUG ${CMAKE_SHARED_LINKER_FLAGS_DEBUG})  # removing debug info from Debug build!!
 
+add_dependencies(${LOADER_X86_PROJECT_NAME} stub2rsrc) # stub2rsrc built required
 target_link_libraries(${LOADER_X86_PROJECT_NAME} common)
+
+# When loader is built, launch stub2rsrc to build stub_xx.bin from compiled loader executable
+add_custom_command(TARGET ${LOADER_X86_PROJECT_NAME}
+                   POST_BUILD
+                   COMMAND $<TARGET_FILE:stub2rsrc> ARGS "$<TARGET_FILE:loader_x86>" "$<TARGET_FILE_DIR:loader_x86>/stub_x86.bin"
+				   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                   COMMENT "Extracting raw loader code from compiled loader executable")			   
