@@ -21,7 +21,7 @@ int StubEP()
     pop eax             // <-- current eip in edx
     sub eax, 4 + 5      // <-- get VA of __data_raw:  [4 - count of nops(sizeof stubDataOffset)] + [5-sizeof call __getmyaddr]
     mov ecx, eax        // save stubDataOffset
-    add eax, [ecx]
+    sub eax, [ecx]
     mov pStubData, eax
   }
 
