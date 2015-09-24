@@ -688,7 +688,7 @@ namespace PeLib
       obBuffer << m_vNewiid[i].impdesc.ForwarderChain;
       dword dwPdll = uiSizeofdescriptors + uiSizeofoft + uiImprva + dllsize;
       obBuffer << (fixEntries ? dwPdll : m_vNewiid[i].impdesc.Name);
-      obBuffer << (fixEntries && pIAT != nullptr ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
+      obBuffer << (fixEntries && pIAT == nullptr ? dwPoft : m_vNewiid[i].impdesc.FirstThunk);
 
       dllsize += static_cast<unsigned int>(m_vNewiid[i].name.size()) + 1;
     }
