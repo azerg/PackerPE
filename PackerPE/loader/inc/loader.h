@@ -5,10 +5,15 @@
 
 typedef LONG NTSTATUS, *PNTSTATUS;
 typedef NTSTATUS ( __stdcall *fpRtlDecompressBuffer )( USHORT, PUCHAR, ULONG, PUCHAR, ULONG, PULONG );
+typedef HMODULE(__stdcall *fpLoadLibraryA)(char*);
+typedef FARPROC(__stdcall *fpGetProcAddress)(HMODULE, char*);
+
 
 int StubEP();
 void StartOriginalPE( stub::PSTUB_DATA pStubData );
 void UnpackSections(stub::PSTUB_DATA pStubData );
+void PrepareOriginalImage(stub::PSTUB_DATA pStubData);
+void FixRelocations(IMAGE_BASE_RELOCATION *base_reloc, DWORD relocation_size, DWORD new_imgbase, DWORD old_imgbase);
 
 typedef struct _PEB {
 

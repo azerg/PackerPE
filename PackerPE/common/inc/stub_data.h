@@ -10,12 +10,17 @@ namespace stub
     pointer_t pLoadLibrary; // <-- IAT should point here in Alpha
     pointer_t pGetProcAddress;
     pointer_t pRtlDecompressBuffer;
-    DWORD unused_iatnull_1;
-    DWORD dwImageBase;
+    DWORD unused_iatnull_1; // <-- is filled by OS with zeroes, while filling iat data
+    DWORD dwNewImageBase;
+    DWORD dwOriginalImageBase;
     DWORD dwOriginalEP;
-    DWORD dwOriIAT;
-    DWORD dwOriginalIVA;        //Original Virtual Address Of Import
-    DWORD dwOriginalIS;         //Original Size Of Import
+    // todo(azerg): maybe replace code below with complete PE-header :D
+    DWORD dwOriginalRelocVA;
+    DWORD dwOriginalRelocSize;
+    DWORD dwOriginalIATVA;
+    DWORD dwOriginalIATSize; // todo(azerg): remove this field?
+    DWORD dwOriginalImportVA;
+    DWORD dwOriginalImportSize;
   }STUB_DATA, *PSTUB_DATA;
 
   #define STUB_IAT_SIZE 16

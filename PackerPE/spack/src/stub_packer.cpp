@@ -22,9 +22,16 @@ private:
   {
     const PeLib::PeHeaderT<bits>& peh = static_cast<PeLib::PeFileT<bits>&>(peFile).peHeader();
 
+    stubData_.dwOriginalImageBase = peh.getImageBase();
+
     stubData_.dwOriginalEP = peh.getAddressOfEntryPoint();
-    stubData_.dwOriginalIVA = peh.getIddImportRva();
-    stubData_.dwOriginalIS = peh.getIddImportSize();
+    stubData_.dwOriginalRelocVA = peh.getIddBaseRelocRva();
+    stubData_.dwOriginalRelocSize = peh.getIddBaseRelocSize();
+    stubData_.dwOriginalIATVA = peh.getIddIatRva();
+    stubData_.dwOriginalIATSize = peh.getIddIatSize();
+    stubData_.dwOriginalImportVA = peh.getIddImportRva();
+    stubData_.dwOriginalImportSize = peh.getIddImportSize();
+
   }
 
   std::vector<uint8_t>& outFileBuffer_;
