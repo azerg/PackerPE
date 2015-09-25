@@ -13,7 +13,7 @@ environment:
   BUILD_EXAMPLES: OFF  # don't build examples to not exceed allowed build time (40 min)
 
 configuration:
-  - Debug
+#  - Debug
   - Release
   
 matrix:

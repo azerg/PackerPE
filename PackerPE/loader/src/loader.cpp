@@ -87,7 +87,16 @@ void UnpackSections(stub::PSTUB_DATA pStubData)
 
 void PrepareOriginalImage(stub::PSTUB_DATA pStubData)
 {
-  FixRelocations((PIMAGE_BASE_RELOCATION)(pStubData->dwNewImageBase + pStubData->dwOriginalRelocVA), pStubData->dwOriginalRelocSize, pStubData->dwNewImageBase, pStubData->dwOriginalImageBase);
+  PIMAGE_DOS_HEADER pDOSHead = reinterpret_cast<PIMAGE_DOS_HEADER>(pStubData->dwNewImageBase);
+  PIMAGE_NT_HEADERS32 pNtHead = reinterpret_cast<PIMAGE_NT_HEADERS32>(reinterpret_cast<char*>(pDOSHead) + pDOSHead->e_lfanew);
+  auto pImportVA = pNtHead->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+  // not needed yet. Output executable will be loaded at fixed address.
+  /*FixRelocations( 
+    (PIMAGE_BASE_RELOCATION)(pStubData->dwNewImageBase + pStubData->dwOriginalRelocVA)
+    , pStubData->dwOriginalRelocSize
+    , pStubData->dwNewImageBase
+    , pStubData->dwOriginalImageBase);*/
+  FixImports(pStubData, (void*)pStubData->dwNewImageBase, pNtHead, (PIMAGE_IMPORT_DESCRIPTOR)pImportVA);
 }
 
 //----------------------------------------------------------------------------------------------------------------

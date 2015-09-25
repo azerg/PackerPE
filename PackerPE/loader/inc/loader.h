@@ -14,6 +14,7 @@ void StartOriginalPE( stub::PSTUB_DATA pStubData );
 void UnpackSections(stub::PSTUB_DATA pStubData );
 void PrepareOriginalImage(stub::PSTUB_DATA pStubData);
 void FixRelocations(IMAGE_BASE_RELOCATION *base_reloc, DWORD relocation_size, DWORD new_imgbase, DWORD old_imgbase);
+bool FixImports(stub::PSTUB_DATA pStub, void *base, IMAGE_NT_HEADERS *ntHd, IMAGE_IMPORT_DESCRIPTOR *impDesc);
 
 typedef struct _PEB {
 

@@ -4,7 +4,15 @@
 #include "import_packer.h"
 #include "common_utils.h"
 #include <iostream>
+#include <set>
 
+// hardcoded PackerOptions just for testing. todo(azerg): move it to main packer as external setter
+enum class PackingOptions
+{
+  stripRelocs, // strip relocs in packed file
+};
+typedef std::set<PackingOptions> PackingOptionsList;
+PackingOptionsList gPackingOptions{PackingOptions::stripRelocs};
 
 uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
 {
@@ -52,14 +60,23 @@ public:
     std::vector<uint8_t>& outFileBuffer
     , const SectionsArr& newSections
     , const ImportsArr& newImports
-    , uint32_t& offset) :
+    , uint32_t& offset
+    , const PackingOptionsList& packingOptions) :
     outFileBuffer_(outFileBuffer)
     , newSections_(newSections)
     , newImports_(newImports)
     , offset_(offset)
+    , packingOptions_(packingOptions)
   {}
   virtual void callback(PeLib::PeFile32& file) { rebuildPEHeader<32>(file); }
   virtual void callback(PeLib::PeFile64& file) { rebuildPEHeader<64>(file); }
+private:
+  std::vector<uint8_t>& outFileBuffer_;
+  const SectionsArr& newSections_;
+  const ImportsArr& newImports_;
+  uint32_t& offset_;
+  const PackingOptionsList& packingOptions_;
+
 private:
   template <int bits>
   void UpdateSizeOfImage(PeLib::PeHeaderT<bits>& newPeHeader)
@@ -107,6 +124,23 @@ private:
     UpdateSizeOfImage(nPeh);
 
     //----------------------------------------------
+    // Stripping relocs if needed
+
+    if (packingOptions_.find(PackingOptions::stripRelocs) != packingOptions_.end())
+    {
+      //nPeh->setCharacteristics();
+      auto originalCharacteristics = nPeh.getCharacteristics();
+      if ((originalCharacteristics & ~IMAGE_FILE_RELOCS_STRIPPED) != 0) // cleanup relocs only if they exists
+      {
+        originalCharacteristics += IMAGE_FILE_RELOCS_STRIPPED;
+        nPeh.setCharacteristics(originalCharacteristics);
+
+        nPeh.setIddBaseRelocRva(0);
+        nPeh.setIddBaseRelocSize(0);
+      }
+    }
+
+    //----------------------------------------------
     // saving new PE-HEad in output buffer
 
     std::vector<PeLib::byte> peHeaderBuff;
@@ -126,11 +160,6 @@ private:
     }
     offset_ += headersSize;
   }
-
-  std::vector<uint8_t>& outFileBuffer_;
-  const SectionsArr& newSections_;
-  const ImportsArr& newImports_;
-  uint32_t& offset_;
 };
 
 //==================================================================================
@@ -161,7 +190,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   std::vector<uint8_t> outFileBuffer;
   auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
-  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset);
+  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset, gPackingOptions);
   srcPeFile_->visit(peVisitor);
 
   //--------------------------------------------------------------------------------
