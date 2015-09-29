@@ -10,7 +10,6 @@ int StubEP()
   // get address of STUB_DATA
   __asm{
     jmp __data_raw_end
-  __data_raw:
     nop                 // <-- packer will write relative offset of stub data here
     nop
     nop
@@ -50,7 +49,7 @@ void StartOriginalPE(stub::PSTUB_DATA pStubData)
     jmp pOriginalEP
   }
 }
-
+/*
 void UnpackSections(stub::PSTUB_DATA pStubData)
 {
   PIMAGE_DOS_HEADER pDOSHead = reinterpret_cast<PIMAGE_DOS_HEADER>(pStubData->dwNewImageBase);
@@ -83,7 +82,7 @@ void UnpackSections(stub::PSTUB_DATA pStubData)
       pSectionHead->Misc.VirtualSize,
       reinterpret_cast<PULONG>(dwUnpackedSize));
   }
-}
+}*/
 
 void PrepareOriginalImage(stub::PSTUB_DATA pStubData)
 {
@@ -114,35 +113,18 @@ void PrepareOriginalImage(stub::PSTUB_DATA pStubData)
 //   This one is mine, but obviously..."adapted" from matt's original idea =p
 #define MakeDelta(cast, x, y) (cast) ( (DWORD_PTR)(x) - (DWORD_PTR)(y))
 
-//   Matt Pietrek's function
-PIMAGE_SECTION_HEADER GetEnclosingSectionHeader(DWORD rva, PIMAGE_NT_HEADERS pNTHeader)
-{
-  PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(pNTHeader);
-  unsigned int i;
-
-  for (i = 0; i < pNTHeader->FileHeader.NumberOfSections; i++, section++){
-    // This 3 line idiocy is because Watcom's linker actually sets the
-    // Misc.VirtualSize field to 0.  (!!! - Retards....!!!)
-    DWORD size = section->Misc.VirtualSize;
-    if (0 == size)
-      size = section->SizeOfRawData;
-
-    // Is the RVA within this section?
-    if ((rva >= section->VirtualAddress) &&
-      (rva < (section->VirtualAddress + size)))
-      return section;
-  }
-
-  return 0;
-}
 
 bool FixImports(stub::PSTUB_DATA pStub, DWORD Newbase, IMAGE_IMPORT_DESCRIPTOR *impDesc)
 {
   char* module;
+  volatile HMODULE hCurrentModule; // dont store val in register
 
   //   Loop through all the required modules
   while ((module = (char*)(impDesc->Name + Newbase))){
-    HMODULE hMod = ((fpLoadLibraryA)pStub->pLoadLibrary)(module);
+    hCurrentModule = ((fpLoadLibraryA)pStub->pLoadLibrary)(module);
+
+    if (impDesc->Name == NULL)
+      break;
 
     IMAGE_THUNK_DATA *itd =
       (IMAGE_THUNK_DATA *)(impDesc->FirstThunk + Newbase);
@@ -151,28 +133,8 @@ bool FixImports(stub::PSTUB_DATA pStub, DWORD Newbase, IMAGE_IMPORT_DESCRIPTOR *
       IMAGE_IMPORT_BY_NAME *iibn;
 
       iibn = (IMAGE_IMPORT_BY_NAME *)(itd->u1.AddressOfData + Newbase);
-      
-      auto pName = iibn->Name;
-      auto pIatFunction = itd->u1.Function;
-      __asm
-      {
-        nop
-        nop
-        nop
-        nop
-        pushad
-        mov eax, pIatFunction
-        mov ecx, pName
-        mov ebx, iibn
-        mov edx, itd
-        popad
-        nop
-        nop
-        nop
-        nop
-      }
 
-      itd->u1.Function = MakePtr(DWORD, ((fpGetProcAddress)pStub->pGetProcAddress)(hMod, (char *)iibn->Name), 0);
+      itd->u1.Function = MakePtr(DWORD, ((fpGetProcAddress)pStub->pGetProcAddress)(hCurrentModule, (char *)iibn->Name), 0);
 
       itd++;
     }

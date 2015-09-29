@@ -84,9 +84,17 @@ void rebuildSections(
     auto sectionDataBegin = &sourceFileBuff.at(peh.getPointerToRawData(idxSection));
 
     //------------------------------------------------------------------------------
-    // test only
+    // saving original sections data for testing only (!)
     sectionInfo.newHeader = sectionInfo.originalHeader;
     sectionInfo.data.assign(sectionDataBegin, sectionDataBegin + cbSection);
+    //------------------------------------------------------------------------------
+    // marking .idata section as writable for testing only (!!!!)
+
+    if (std::string((char*)sectionInfo.originalHeader.Name).compare(".idata") == 0)
+    {
+      sectionInfo.newHeader.Characteristics = sectionInfo.newHeader.Characteristics | PeLib::PELIB_IMAGE_SCN_MEM_WRITE;
+    }
+
     //------------------------------------------------------------------------------
 
     // saving section data
