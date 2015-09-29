@@ -87,16 +87,17 @@ void UnpackSections(stub::PSTUB_DATA pStubData)
 
 void PrepareOriginalImage(stub::PSTUB_DATA pStubData)
 {
-  PIMAGE_DOS_HEADER pDOSHead = reinterpret_cast<PIMAGE_DOS_HEADER>(pStubData->dwNewImageBase);
-  PIMAGE_NT_HEADERS32 pNtHead = reinterpret_cast<PIMAGE_NT_HEADERS32>(reinterpret_cast<char*>(pDOSHead) + pDOSHead->e_lfanew);
-  auto pImportVA = pNtHead->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
   // not needed yet. Output executable will be loaded at fixed address.
   /*FixRelocations( 
     (PIMAGE_BASE_RELOCATION)(pStubData->dwNewImageBase + pStubData->dwOriginalRelocVA)
     , pStubData->dwOriginalRelocSize
     , pStubData->dwNewImageBase
     , pStubData->dwOriginalImageBase);*/
-  FixImports(pStubData, (void*)pStubData->dwNewImageBase, pNtHead, (PIMAGE_IMPORT_DESCRIPTOR)pImportVA);
+
+    FixImports(
+    pStubData
+    , pStubData->dwNewImageBase
+    , (PIMAGE_IMPORT_DESCRIPTOR)(pStubData->dwOriginalImportVA + pStubData->dwNewImageBase));
 }
 
 //----------------------------------------------------------------------------------------------------------------
@@ -135,40 +136,41 @@ PIMAGE_SECTION_HEADER GetEnclosingSectionHeader(DWORD rva, PIMAGE_NT_HEADERS pNT
   return 0;
 }
 
-//   This function is also Pietrek's
-LPVOID GetPtrFromRVA(DWORD rva, IMAGE_NT_HEADERS *pNTHeader, PBYTE imageBase)
-{
-  PIMAGE_SECTION_HEADER pSectionHdr;
-  INT delta;
-
-  pSectionHdr = GetEnclosingSectionHeader(rva, pNTHeader);
-  if (!pSectionHdr)
-    return 0;
-
-  delta = (INT)(pSectionHdr->VirtualAddress - pSectionHdr->PointerToRawData);
-  return (PVOID)(imageBase + rva - delta);
-}
-
-bool FixImports(stub::PSTUB_DATA pStub, void *base, IMAGE_NT_HEADERS *ntHd, IMAGE_IMPORT_DESCRIPTOR *impDesc)
+bool FixImports(stub::PSTUB_DATA pStub, DWORD Newbase, IMAGE_IMPORT_DESCRIPTOR *impDesc)
 {
   char* module;
 
   //   Loop through all the required modules
-  while ((module = (char*)GetPtrFromRVA((DWORD)(impDesc->Name), ntHd, (PBYTE)base))){
-    //   If the library is already loaded(like kernel32.dll or ntdll.dll) LoadLibrary will
-    //   just return the handle to that module.
+  while ((module = (char*)(impDesc->Name + Newbase))){
     HMODULE hMod = ((fpLoadLibraryA)pStub->pLoadLibrary)(module);
 
-    //   Lookup the first import thunk for this module
-    //   NOTE: It is possible this module could forward functions...which is something
-    //   that I really should handle.  Maybe i'll add support for forwared functions
-    //   a little bit later.
     IMAGE_THUNK_DATA *itd =
-      (IMAGE_THUNK_DATA *)GetPtrFromRVA((DWORD)(impDesc->FirstThunk), ntHd, (PBYTE)base);
+      (IMAGE_THUNK_DATA *)(impDesc->FirstThunk + Newbase);
 
     while (itd->u1.AddressOfData){
       IMAGE_IMPORT_BY_NAME *iibn;
-      iibn = (IMAGE_IMPORT_BY_NAME *)GetPtrFromRVA((DWORD)(itd->u1.AddressOfData), ntHd, (PBYTE)base);
+
+      iibn = (IMAGE_IMPORT_BY_NAME *)(itd->u1.AddressOfData + Newbase);
+      
+      auto pName = iibn->Name;
+      auto pIatFunction = itd->u1.Function;
+      __asm
+      {
+        nop
+        nop
+        nop
+        nop
+        pushad
+        mov eax, pIatFunction
+        mov ecx, pName
+        mov ebx, iibn
+        mov edx, itd
+        popad
+        nop
+        nop
+        nop
+        nop
+      }
 
       itd->u1.Function = MakePtr(DWORD, ((fpGetProcAddress)pStub->pGetProcAddress)(hMod, (char *)iibn->Name), 0);
 
