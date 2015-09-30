@@ -10,17 +10,22 @@ int StubEP()
   // get address of STUB_DATA
   __asm{
     jmp __data_raw_end
-    nop                 // <-- packer will write relative offset of stub data here
+  __data_raw_begin:
+    rcl eax, 0xd0             // <-- packer will write relative offset of stub data here
+    rcl eax, 0xd0             // rcl-filled buff is 6 bytes long 0xc1d0d0 0xc1d0d0
     nop
-    nop
-    nop
+    nop                       // added dummy nopes to get sizeof(int64_t) of raw_data
   __data_raw_end:
     call __getmyaddr
   __getmyaddr:
-    pop eax             // <-- current eip in eax
-    sub eax, 4 + 5      // <-- get VA of __data_raw:  [4 - count of nops(sizeof stubDataOffset)] + [5-sizeof call __getmyaddr]
+    pop eax                   // <-- current eip in eax
+    mov ebx, __data_raw_begin
+    mov ecx, __data_raw_end
+    sub ecx, ebx              // calculating size of data_raw.
+    sub eax, ecx              // <-- get VA of __data_raw:  sub size of data_raw internal buffer
+    sub eax, 5                // <-- get VA of __data_raw:  5 -> sizeof call __getmyaddr
     mov ecx, eax
-    sub eax, [ecx]      // current IEP - relativeOffset == pStubData address
+    sub eax, [ecx]            // current IEP - relativeOffset == pStubData address
     mov pStubData, eax
   }
 
@@ -28,7 +33,6 @@ int StubEP()
   __asm {
     mov eax, FS:[0x30];
     mov Peb, eax
-    nop
   }
 
   pStubData->dwOriginalEP += Peb->ImageBaseAddress;

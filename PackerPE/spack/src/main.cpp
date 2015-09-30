@@ -78,7 +78,10 @@ int _tmain(int argc, _TCHAR* argv[])
     ctx.outfile = GenerateOutputFilename(ctx.infile);
   }
 
-  PackExecutable(ctx.infile, ctx.outfile);
+  // hardocded default packing options
+  PackingOptionsList gPackingOptions{PackingOptions::stripRelocs};
+
+  PackExecutable(ctx.infile, ctx.outfile, gPackingOptions);
 
   return 0;
 }

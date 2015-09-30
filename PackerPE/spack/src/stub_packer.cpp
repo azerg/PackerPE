@@ -27,8 +27,6 @@ private:
     stubData_.dwOriginalEP = peh.getAddressOfEntryPoint();
     stubData_.dwOriginalRelocVA = peh.getIddBaseRelocRva();
     stubData_.dwOriginalRelocSize = peh.getIddBaseRelocSize();
-    stubData_.dwOriginalIATVA = peh.getIddIatRva();
-    stubData_.dwOriginalIATSize = peh.getIddIatSize();
     stubData_.dwOriginalImportVA = peh.getIddImportRva();
     stubData_.dwOriginalImportSize = peh.getIddImportSize();
 

@@ -6,14 +6,6 @@
 #include <iostream>
 #include <set>
 
-// hardcoded PackerOptions just for testing. todo(azerg): move it to main packer as external setter
-enum class PackingOptions
-{
-  stripRelocs, // strip relocs in packed file
-};
-typedef std::set<PackingOptions> PackingOptionsList;
-PackingOptionsList gPackingOptions{PackingOptions::stripRelocs};
-
 uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
@@ -171,7 +163,8 @@ NewPEBuilder::NewPEBuilder(
   , IImportPacker* pImportPacker
   , IStubPacker* pStubPacker
   , ISectionsPacker* pSectionsPacker
-  , ILoaderPacker* pLoaderPacker):
+  , ILoaderPacker* pLoaderPacker
+  , const PackingOptionsList& packingOptions):
   srcPeFile_(srcPeFile)
   , sourceFileBuff_(sourceFileBuff)
   , additionalSizeRequest_(additionalSizeRequest)
@@ -179,6 +172,7 @@ NewPEBuilder::NewPEBuilder(
   , stubPacker_(pStubPacker)
   , sectionsPacker_(pSectionsPacker)
   , loaderPacker_(pLoaderPacker)
+  , packingOptions_(packingOptions)
 {
   newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
   // new import RVA passed here
@@ -190,7 +184,7 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
   std::vector<uint8_t> outFileBuffer;
   auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
 
-  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset, gPackingOptions);
+  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset, packingOptions_);
   srcPeFile_->visit(peVisitor);
 
   //--------------------------------------------------------------------------------

@@ -23,13 +23,32 @@ int32_t GetStubDataOffset(const AdditionalDataBlocksType& additionalDataBlocks)
   return loaderBlock.virtualOffset - stubBlock.virtualOffset;
 }
 
+uint32_t GetRawDataOffsetInStubData(std::vector<PeLib::byte>& loaderBuff)
+{
+  // looking for marker inside loaderBuff. (O(n) but doesnt matters yet)
+  auto loaderSize = loaderBuff.size();
+  for (auto loaderBuffIdx = 0; loaderBuffIdx <= loaderSize; ++loaderBuffIdx)
+  {
+    auto* byte = &loaderBuff.at(loaderBuffIdx);
+    if (*byte == 0xc1)
+    {
+      auto tmp = *reinterpret_cast<uint64_t*>(byte);
+      if (*reinterpret_cast<uint64_t*>(byte) == 0x9090d0d0c1d0d0c1) // raw data rcl-based magic
+      {
+        return loaderBuffIdx;
+      }
+    }
+  }
+
+  throw std::runtime_error("Invalid loader - cant find magic");
+}
+
 // this function is used to save offset to stubData somewhere in loader :D
 void ModifyLoaderWithStubDataInfo(std::vector<PeLib::byte>& inOutLoaderBuff, const AdditionalDataBlocksType& additionalDataBlocks)
 {
   auto stubDataOffset = GetStubDataOffset(additionalDataBlocks);
 
-  //todo(azerg): do smth with this
-  const auto loaderCaveOffset = 8;
+  const auto loaderCaveOffset = GetRawDataOffsetInStubData(inOutLoaderBuff);
 
   // add caveOffset to stubDataOffset to get stubData easily from loader
   stubDataOffset += loaderCaveOffset;

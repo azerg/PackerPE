@@ -10,7 +10,6 @@
 #include "import_packer.h"
 #include "stub_packer.h"
 #include "loader_packer.h"
-#include "new_pe_builder.h"
 #include "file_utils.h"
 #include "tiny_logger.h"
 
@@ -40,7 +39,7 @@ void LoadPeFile(PeFileType& pef)
   // <-- Reserved ???
 }
 
-ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outFileName)
+ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outFileName, const PackingOptionsList& packingOptions)
 {
   try
   {
@@ -92,7 +91,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     //-----------------------------------------------------
     // generating output file contents
 
-    NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker, &loaderPacker);
+    NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker, &loaderPacker, packingOptions);
 
     auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
 
