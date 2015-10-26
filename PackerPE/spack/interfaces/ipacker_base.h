@@ -56,7 +56,10 @@ public:
   * independent.
   */
   virtual Expected<ErrorCode> IsReady() const = 0;
+  PackerType GetPackerType() const noexcept { return packerType_; }
 protected:
   std::shared_ptr<PeLib::PeFile> srcPEFile_;
   PackerType packerType_;
 };
+
+typedef std::shared_ptr<IPackerBase> IPackerBasePtr;

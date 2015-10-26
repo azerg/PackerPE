@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#include "main_loop.h"
 #include "sections_packer.h"
 #include "import_packer.h"
 #include "stub_packer.h"
