@@ -50,7 +50,6 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     }
 
     auto sourceFileBuff = file_utils::readFile(srcFileName.c_str());
-    decltype(sourceFileBuff) outFileBuff;
 
     if (boost::filesystem::exists(outFileName))
     {
@@ -68,8 +67,19 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     std::vector<RequiredDataBlock> additionalSizeRequest;
 
     LoadPeFile(pef);
-    //-----------------------------------------------------
 
+    //----------- moving to MainLoop architecture ------------
+    MainLoop mainLoop(srcFileName, outFileName);
+
+    mainLoop.AddPacker(std::make_shared<ImportPacker>(pef));
+    mainLoop.AddPacker(std::make_shared<LoaderPacker>(pef));
+    mainLoop.AddPacker(std::make_shared<StubPacker>(pef));
+    mainLoop.AddPacker(std::make_shared<SectionsPacker>(pef));
+
+    //--------------------------------------------------------
+
+
+    /*
     ImportPacker importPacker(pef);
     auto requiredImportDataBlocks = importPacker.GetRequiredDataBlocks();
     // moving required import blocks
@@ -97,7 +107,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
 
     file_utils::writeFile(outFileName.c_str(), 0, reinterpret_cast<const char*>(outBuffer.data()), outBuffer.size());
-
+    */
     //-----------------------------------------------------
 
     return ErrorCode::ERROR_SUCC;

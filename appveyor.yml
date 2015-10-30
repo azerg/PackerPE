@@ -23,7 +23,8 @@ matrix:
 # lets go	
 init:
   - cmd: cmake --version
-  - cmd: msbuild /version  
+  - cmd: msbuild /version
+  - cmd: dir C:\Libraries\boost_1_59_0\lib32-msvc-14.0
   
 before_build:
   - if %platform%==Win32 set generator=Visual Studio 14
@@ -32,7 +33,7 @@ before_build:
   - if %platform%==x64 set vcplatform=x64
   - if %platform%==x64 set BOOST_LIBRARYDIR=%BOOST_LIBRARYDIR64%
   - cmd: cd PackerPE
-  - cmake . -B"build" -G"%generator%" -Wno-dev -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"
+  - cmake . -B"build" -G"%generator%" -Wno-dev -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DBoost_USE_STATIC_LIBS=ON
   
 build:
   project: C:\projects\PackerPE\PackerPE\build\spack.sln # path to Visual Studio solution or project
