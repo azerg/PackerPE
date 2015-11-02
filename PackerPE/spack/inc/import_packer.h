@@ -17,6 +17,6 @@ public:
     IImportPacker(srcPEFile)
   {}
   ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate);
-  Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
+  Expected<ErrorCode> IsReady(const std::forward_list<PackerType>& readyPackersList) const { return ErrorCode::kOk; }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const;
 };

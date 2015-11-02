@@ -46,7 +46,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
   {
     if (!boost::filesystem::exists(srcFileName))
     {
-      return ErrorCode::FILE_NOT_FOUND;
+      return ErrorCode::kFileNotFound;
     }
 
     auto sourceFileBuff = file_utils::readFile(srcFileName.c_str());
@@ -60,7 +60,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     if (!pef)
     {
       std::cout << "Invalid PE File" << std::endl;
-      return ErrorCode::INVALID_PE_FILE;
+      return ErrorCode::kInvalidPEFile;
     }
 
     // stores data sizes required by different packers
@@ -76,32 +76,11 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     mainLoop.AddPacker(std::make_shared<StubPacker>(pef));
     mainLoop.AddPacker(std::make_shared<SectionsPacker>(pef));
 
-    //--------------------------------------------------------
-
-
-    /*
-    ImportPacker importPacker(pef);
-    auto requiredImportDataBlocks = importPacker.GetRequiredDataBlocks();
-    // moving required import blocks
-    additionalSizeRequest = std::move(requiredImportDataBlocks);
-
-    //-----------------------------------------------------
-
-    LoaderPacker loaderPacker(pef);
-    auto requiredLoaderBlock = loaderPacker.GetRequiredDataBlocks();
-    std::move(requiredLoaderBlock.begin(), requiredLoaderBlock.end(), std::back_inserter(additionalSizeRequest));
-
-    //-----------------------------------------------------
-
-    StubPacker stubPacker(pef);
-    auto stubRequiredBlocks = stubPacker.GetRequiredDataBlocks();
-    std::move(stubRequiredBlocks.begin(), stubRequiredBlocks.end(), std::back_inserter(additionalSizeRequest));
-
-    SectionsPacker sectionsPacker(pef);
+    mainLoop.PackFile();
 
     //-----------------------------------------------------
     // generating output file contents
-
+    /*
     NewPEBuilder newPEBuilder(pef, sourceFileBuff, additionalSizeRequest, &importPacker, &stubPacker, &sectionsPacker, &loaderPacker, packingOptions);
 
     auto outBuffer = newPEBuilder.GenerateOutputPEFile().get();
@@ -110,12 +89,12 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     */
     //-----------------------------------------------------
 
-    return ErrorCode::ERROR_SUCC;
+    return ErrorCode::kOk;
   }
   catch (std::runtime_error& err)
   {
     std::cout << err.what();
   }
 
-  return ErrorCode::FATAL_ERROR;
+  return ErrorCode::kFatalError;
 }

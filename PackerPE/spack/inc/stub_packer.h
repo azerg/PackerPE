@@ -13,7 +13,7 @@ public:
   virtual void ProcessExecutable(
     std::vector<uint8_t>& sourceFileBuff
     , const AdditionalDataBlocksType& additionalDataBlocks);
-  Expected<ErrorCode> IsReady() const { return ErrorCode::ERROR_SUCC; }
+  Expected<ErrorCode> IsReady(const std::forward_list<PackerType>& readyPackersList) const { return ErrorCode::kOk; }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const
   {
     std::vector<RequiredDataBlock> result;
