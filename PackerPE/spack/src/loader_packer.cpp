@@ -56,7 +56,9 @@ void ModifyLoaderWithStubDataInfo(std::vector<PeLib::byte>& inOutLoaderBuff, con
   *reinterpret_cast<int32_t*>(&inOutLoaderBuff.at(loaderCaveOffset)) = stubDataOffset;
 }
 
-void LoaderPacker::ProcessExecutable(std::vector<uint8_t>& outFileBuffer, const AdditionalDataBlocksType& additionalDataBlocks)
+void LoaderPacker::ProcessExecutable(
+  std::vector<uint8_t>& outFileBuffer,
+  const AdditionalDataBlocksType& additionalDataBlocks)
 {
   auto loaderBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kLoaderPacker);
 

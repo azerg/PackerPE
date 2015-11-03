@@ -29,7 +29,9 @@ public:
     , IPackerBase(srcPEFile, PackerType::kLoaderPacker)
   {}
   virtual ~ILoaderPacker(){};
-  virtual void ProcessExecutable(std::vector<uint8_t>& outFileBuffer, const AdditionalDataBlocksType& additionalDataBlocks) = 0;
+  virtual void ProcessExecutable(
+    std::vector<uint8_t>& outFileBuffer,
+    const AdditionalDataBlocksType& additionalDataBlocks) = 0;
 
 protected:
   boost::filesystem::path loadersStoragePath_;

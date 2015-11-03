@@ -18,6 +18,7 @@ public:
   {}
   ErrorCode PackFile();
 private:
-  bool PackerIsReady(PackerType packerType) const;
+  bool PackerIsReady(PackerType packerType, const std::forward_list<PackerType>& readyPackersVt) const;
   boost::optional<IPackerBasePtr> GetPacker(PackerType packerType) const noexcept;
+  std::vector<RequiredDataBlock> LoadRequiredDataBlocks() const;
 };

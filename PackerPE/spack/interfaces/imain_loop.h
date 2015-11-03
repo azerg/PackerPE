@@ -23,11 +23,10 @@ public:
   }
 
 protected:
-  virtual bool PackerIsReady(PackerType packerType) const = 0;
+  virtual bool PackerIsReady(PackerType packerType, const std::forward_list<PackerType>& readyPackersVt) const = 0;
   virtual ErrorCode PackFile() = 0;
 
   std::forward_list<IPackerBasePtr> packersVt_;
   const std::string srcFilePath_;
   const std::string destFilePath_;
-  std::forward_list<PackerType> readyPackersVt_;
 };

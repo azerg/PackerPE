@@ -2,7 +2,7 @@
 
 #include "main_loop.h"
 
-bool MainLoop::PackerIsReady(PackerType packerType) const
+bool MainLoop::PackerIsReady(PackerType packerType, const std::forward_list<PackerType>& readyPackersVt) const
 {
   auto existentPacker = GetPacker(packerType);
   if (!existentPacker.is_initialized())
@@ -10,22 +10,25 @@ bool MainLoop::PackerIsReady(PackerType packerType) const
     throw std::runtime_error("Required packer is not exists");
   }
 
-  auto isReady = (*existentPacker)->IsReady(readyPackersVt_);
+  auto isReady = (*existentPacker)->IsReady(readyPackersVt);
 
   return isReady.get() == ErrorCode::kOk;
 }
 
 ErrorCode MainLoop::PackFile()
 {
-  std::vector<RequiredDataBlock> requiredDataBlocks;
+  auto requiredDataBlocks = LoadRequiredDataBlocks();
+
+  std::forward_list<PackerType> readyPackersVt;
+
   for (const auto& packer : packersVt_)
   {
-    auto singlePackerRequiredDataBlocks = packer->GetRequiredDataBlocks();
-    std::move(
-      std::begin(singlePackerRequiredDataBlocks),
-      std::end(singlePackerRequiredDataBlocks),
-      std::back_inserter(requiredDataBlocks));
+    if (PackerIsReady(packer->GetPackerType(), readyPackersVt))
+    {
+      //
+    }
   }
+
   return ErrorCode();
 }
 
@@ -39,4 +42,18 @@ boost::optional<IPackerBasePtr> MainLoop::GetPacker(PackerType packerType) const
     }
   }
   return boost::none;
+}
+
+std::vector<RequiredDataBlock> MainLoop::LoadRequiredDataBlocks() const
+{
+  std::vector<RequiredDataBlock> requiredDataBlocks;
+  for (const auto& packer : packersVt_)
+  {
+    auto singlePackerRequiredDataBlocks = packer->GetRequiredDataBlocks();
+    std::move(
+      std::begin(singlePackerRequiredDataBlocks),
+      std::end(singlePackerRequiredDataBlocks),
+      std::back_inserter(requiredDataBlocks));
+  }
+  return requiredDataBlocks;
 }
