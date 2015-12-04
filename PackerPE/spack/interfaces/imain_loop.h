@@ -1,7 +1,10 @@
 #pragma once
 
-#include "includes.h"
 #include "ipacker_base.h"
+#include "iloader_packer.h"
+#include "istub_packer.h"
+#include "isections_packer.h"
+#include "iimport_packer.h"
 #include <forward_list>
 
 class IMainLoop
@@ -23,7 +26,7 @@ public:
   }
 
 protected:
-  virtual bool PackerIsReady(PackerType packerType, const std::forward_list<PackerType>& readyPackersVt) const = 0;
+  virtual bool PackerIsReady(PackerType packerType, const std::set<PackerType>& readyPackersVt) const = 0;
   virtual ErrorCode PackFile() = 0;
 
   std::forward_list<IPackerBasePtr> packersVt_;

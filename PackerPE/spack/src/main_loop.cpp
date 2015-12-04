@@ -1,8 +1,9 @@
 #pragma once
 
 #include "main_loop.h"
+#include "file_utils.h"
 
-bool MainLoop::PackerIsReady(PackerType packerType, const std::forward_list<PackerType>& readyPackersVt) const
+bool MainLoop::PackerIsReady(PackerType packerType, const std::set<PackerType>& readyPackersVt) const
 {
   auto existentPacker = GetPacker(packerType);
   if (!existentPacker.is_initialized())
@@ -17,15 +18,17 @@ bool MainLoop::PackerIsReady(PackerType packerType, const std::forward_list<Pack
 
 ErrorCode MainLoop::PackFile()
 {
-  auto requiredDataBlocks = LoadRequiredDataBlocks();
+  std::set<PackerType> readyPackersVt;
 
-  std::forward_list<PackerType> readyPackersVt;
+  auto sourceFileBuff = file_utils::readFile(srcFilePath_.c_str());
+  std::vector<uint8_t> outFileBuffer;
 
-  for (const auto& packer : packersVt_)
+  for (auto& packer : packersVt_)
   {
     if (PackerIsReady(packer->GetPackerType(), readyPackersVt))
     {
-      //
+      ProcessPacker(packer, sourceFileBuff, outFileBuffer);
+      readyPackersVt.insert(packer->GetPackerType());
     }
   }
 

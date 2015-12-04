@@ -103,7 +103,7 @@ void rebuildSections(
     cbSections += cbSection;
   }
 
-  // test only - append reqiured buffer as a new section
+  // test only - append required buffer as a new section
   AppendRequiredSizeSection<bits>(peh, sectionsOut, additionalSizeRequest);
 }
 

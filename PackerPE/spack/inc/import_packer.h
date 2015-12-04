@@ -17,6 +17,14 @@ public:
     IImportPacker(srcPEFile)
   {}
   ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate);
-  Expected<ErrorCode> IsReady(const std::forward_list<PackerType>& readyPackersList) const { return ErrorCode::kOk; }
+  Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const
+  {
+    if (readyPackersList.find(PackerType::kSectionsPacker) != readyPackersList.cend())
+    {
+      return ErrorCode::kOk;
+    }
+
+    return ErrorCode::kBusy;
+  }
   std::vector<RequiredDataBlock> GetRequiredDataBlocks() const;
 };

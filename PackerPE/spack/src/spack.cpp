@@ -11,7 +11,6 @@
 #include "import_packer.h"
 #include "stub_packer.h"
 #include "loader_packer.h"
-#include "file_utils.h"
 #include "tiny_logger.h"
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
@@ -49,8 +48,6 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
       return ErrorCode::kFileNotFound;
     }
 
-    auto sourceFileBuff = file_utils::readFile(srcFileName.c_str());
-
     if (boost::filesystem::exists(outFileName))
     {
       boost::filesystem::remove(outFileName);
@@ -62,9 +59,6 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
       std::cout << "Invalid PE File" << std::endl;
       return ErrorCode::kInvalidPEFile;
     }
-
-    // stores data sizes required by different packers
-    std::vector<RequiredDataBlock> additionalSizeRequest;
 
     LoadPeFile(pef);
 

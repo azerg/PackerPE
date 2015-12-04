@@ -16,7 +16,7 @@ public:
   {}
   virtual ~IStubPacker(){};
   virtual void ProcessExecutable(
-    std::vector<uint8_t>& sourceFileBuff
+    std::vector<uint8_t>& outFileBuffer
     , const AdditionalDataBlocksType& additionalDataBlocks) = 0;
   virtual stub::STUB_DATA& GetStubData(){ return stubData_; }
 

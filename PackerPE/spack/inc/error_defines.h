@@ -4,6 +4,7 @@ enum class ErrorCode
 {
   kOk,
   kFailed,
+  kBusy,
   kFatalError,
   kFileNotFound,
   kInvalidPEFile,

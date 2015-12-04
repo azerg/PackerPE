@@ -27,7 +27,7 @@ uint32_t GetRawDataOffsetInStubData(std::vector<PeLib::byte>& loaderBuff)
 {
   // looking for marker inside loaderBuff. (O(n) but doesnt matters yet)
   auto loaderSize = loaderBuff.size();
-  for (auto loaderBuffIdx = 0; loaderBuffIdx <= loaderSize; ++loaderBuffIdx)
+  for (size_t loaderBuffIdx = 0; loaderBuffIdx <= loaderSize; ++loaderBuffIdx)
   {
     auto* byte = &loaderBuff.at(loaderBuffIdx);
     if (*byte == 0xc1)
@@ -96,7 +96,7 @@ void LoaderPacker::ProcessExecutable(
 
   auto pbuf = loaderFile.rdbuf();
   // get file size
-  auto size = pbuf->pubseekoff(0, loaderFile.end, loaderFile.in);
+  size_t size = static_cast<size_t>(pbuf->pubseekoff(0, loaderFile.end, loaderFile.in));
   pbuf->pubseekpos(0, loaderFile.in);
 
   std::vector<PeLib::byte> loaderData(size);

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "includes.h"
-#include <forward_list>
+#include <set>
+#include <vector>
 
 enum class PackerType
 {
@@ -56,7 +57,7 @@ public:
   * Goal of this proc is to make all packer's pieces to be completely
   * independent.
   */
-  virtual Expected<ErrorCode> IsReady(const std::forward_list<PackerType>& readyPackersList) const = 0;
+  virtual Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const = 0;
   PackerType GetPackerType() const noexcept { return packerType_; }
 protected:
   std::shared_ptr<PeLib::PeFile> srcPEFile_;
