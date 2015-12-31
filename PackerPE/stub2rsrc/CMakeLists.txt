@@ -15,4 +15,4 @@ if (NOT DEFINED ENV{APPVEYOR})
 					   COMMENT "Extracting loader stub from ${LOADER_X86_PROJECT_NAME}")
 endif()	
 
-target_link_libraries(stub2rsrc pelib common)
+target_link_libraries(stub2rsrc common)
