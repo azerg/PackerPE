@@ -10,12 +10,11 @@ public:
     IStubPacker(srcPEFile)
   {}
   virtual ~StubPacker() {};
-  virtual void ProcessExecutable(
-    std::vector<uint8_t>& sourceFileBuff
-    , const AdditionalDataBlocksType& additionalDataBlocks);
+  virtual std::vector<uint8_t> ProcessExecutable();
+
   Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const
   {
-    std::set<PackerType> dependencies{PackerType::kSectionsPacker, PackerType::kImportPacker};
+    std::set<PackerType> dependencies{PackerType::kSectionsPacker};
 
     if (std::includes(readyPackersList.cbegin(), readyPackersList.cend(), dependencies.cbegin(), dependencies.cend()))
     {
@@ -31,7 +30,5 @@ public:
     return result;
   }
 private:
-  std::vector<uint8_t> InititalizeStub(
-    std::vector<uint8_t>& sourceFileBuff
-    , const AdditionalDataBlocksType& additionalDataBlocks);
+  std::vector<uint8_t> InititalizeStub();
 };

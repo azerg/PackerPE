@@ -16,7 +16,7 @@ public:
   ImportPacker(std::shared_ptr<PeLib::PeFile>& srcPEFile) :
     IImportPacker(srcPEFile)
   {}
-  ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate);
+  ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, std::vector<uint8_t>& stubDataToUpdate);
   Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const
   {
     if (readyPackersList.find(PackerType::kSectionsPacker) != readyPackersList.cend())

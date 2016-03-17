@@ -26,7 +26,7 @@ public:
       {
         auto requiredDataBlocks = LoadRequiredDataBlocks();
         auto pImportPacker = &dynamic_cast<IImportPacker&>(*packer);
-        pImportPacker->ProcessExecutable(newSections_.additionalDataBlocks, pStubPacker_->GetStubData());
+        imports_ = pImportPacker->ProcessExecutable(newSections_.additionalDataBlocks, stubData_);
       }
       break;
     case PackerType::kSectionsPacker:
@@ -38,8 +38,8 @@ public:
       break;
     case PackerType::kStubPacker:
       {
-        pStubPacker_ = &dynamic_cast<IStubPacker&>(*packer);
-        pStubPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
+        auto pStubPacker_ = &dynamic_cast<IStubPacker&>(*packer);
+        stubData_ = pStubPacker_->ProcessExecutable();
       }
       break;
     case PackerType::kLoaderPacker:
@@ -59,6 +59,7 @@ private:
   boost::optional<IPackerBasePtr> GetPacker(PackerType packerType) const noexcept;
   std::vector<RequiredDataBlock> LoadRequiredDataBlocks() const;
 
-  IStubPacker* pStubPacker_;
+  ImportsArr imports_;
+  std::vector<uint8_t> stubData_;
   SectionsArr newSections_;
 };

@@ -154,6 +154,8 @@ private:
   }
 };
 
+std::vector<uint8_t> stubDataVt;
+
 //==================================================================================
 
 NewPEBuilder::NewPEBuilder(
@@ -174,9 +176,11 @@ NewPEBuilder::NewPEBuilder(
   , loaderPacker_(pLoaderPacker)
   , packingOptions_(packingOptions)
 {
+  stubDataVt = stubPacker_->ProcessExecutable();
+
   newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
   // new import RVA passed here
-  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks, stubPacker_->GetStubData());
+  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks, stubDataVt);
 }
 
 Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
@@ -218,7 +222,9 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
 
   //--------------------------------------------------------------------------------
   // Insert stub data
-  stubPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
+  auto stubBlock = utils::GetSingleAdditionalBlock(newSections_.additionalDataBlocks, PackerType::kStubPacker);
+
+  utils::ReplaceContainerData(outFileBuffer, stubBlock.rawOffset, stubDataVt);
 
   //--------------------------------------------------------------------------------
   // Insert loader data

@@ -6,13 +6,8 @@
 class FillStubDataVisitor : public PeLib::PeFileVisitor
 {
 public:
-  FillStubDataVisitor(
-    std::vector<uint8_t>& outFileBuffer
-    , const AdditionalDataBlocksType& additionalDataBlocks
-    , stub::STUB_DATA& stubData) :
-    outFileBuffer_(outFileBuffer)
-    , additionalDataBlocks_(additionalDataBlocks)
-    , stubData_(stubData)
+  FillStubDataVisitor(stub::STUB_DATA& stubData) :
+    stubData_(stubData)
   {}
   virtual void callback(PeLib::PeFile32& file) { fillStubData<32>(file); }
   virtual void callback(PeLib::PeFile64& file) { fillStubData<64>(file); }
@@ -29,30 +24,19 @@ private:
     stubData_.dwOriginalRelocSize = peh.getIddBaseRelocSize();
     stubData_.dwOriginalImportVA = peh.getIddImportRva();
     stubData_.dwOriginalImportSize = peh.getIddImportSize();
-
   }
 
-  std::vector<uint8_t>& outFileBuffer_;
-  const AdditionalDataBlocksType& additionalDataBlocks_;
   stub::STUB_DATA& stubData_;
 };
 
-void StubPacker::ProcessExecutable(
-  std::vector<uint8_t>& outFileBuffer
-  , const AdditionalDataBlocksType& additionalDataBlocks)
+std::vector<uint8_t> StubPacker::ProcessExecutable()
 {
-  auto stubBlock = utils::GetSingleAdditionalBlock(additionalDataBlocks, PackerType::kStubPacker);
-
-  auto stubDataVt = InititalizeStub(outFileBuffer, additionalDataBlocks); // fill stub values
-  
-  utils::ReplaceContainerData(outFileBuffer, stubBlock.rawOffset, stubDataVt);
+  return InititalizeStub(); // fill stub values
 }
 
-std::vector<uint8_t> StubPacker::InititalizeStub(
-  std::vector<uint8_t>& sourceFileBuff
-  , const AdditionalDataBlocksType& additionalDataBlocks)
+std::vector<uint8_t> StubPacker::InititalizeStub()
 {
-  FillStubDataVisitor stubDataVisitor(sourceFileBuff, additionalDataBlocks, this->stubData_);
+  FillStubDataVisitor stubDataVisitor(this->stubData_);
   srcPEFile_->visit(stubDataVisitor);
 
   return std::vector<uint8_t>(

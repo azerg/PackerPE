@@ -20,17 +20,37 @@ ErrorCode MainLoop::PackFile()
 {
   std::set<PackerType> readyPackersVt;
 
-  auto sourceFileBuff = file_utils::readFile(srcFilePath_.c_str());
+  const auto& sourceFileBuff = file_utils::readFile(srcFilePath_.c_str());
   std::vector<uint8_t> outFileBuffer;
 
-  for (auto& packer : packersVt_)
+  bool bNotAllParsersProcessed;
+  do
   {
-    if (PackerIsReady(packer->GetPackerType(), readyPackersVt))
+    bNotAllParsersProcessed = false;
+
+    for (auto& packer : packersVt_)
     {
-      ProcessPacker(packer, sourceFileBuff, outFileBuffer);
-      readyPackersVt.insert(packer->GetPackerType());
+      if (PackerIsReady(packer->GetPackerType(), readyPackersVt))
+      {
+        ProcessPacker(packer, sourceFileBuff, outFileBuffer);
+        readyPackersVt.insert(packer->GetPackerType());
+      }
+      else
+      {
+        bNotAllParsersProcessed = true;
+      }
     }
-  }
+
+    // dummy check for testing /// todo(azerg): remove me plz
+    static int antiInfiniteLoop{};
+    if (antiInfiniteLoop > 100)
+    {
+      throw std::runtime_error("infinite mainloop detected");
+    }
+    ++antiInfiniteLoop;
+
+
+  } while (bNotAllParsersProcessed);
 
   return ErrorCode();
 }
