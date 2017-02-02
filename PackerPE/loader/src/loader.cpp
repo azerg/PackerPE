@@ -195,5 +195,3 @@ void FixRelocations(IMAGE_BASE_RELOCATION *base_reloc, DWORD relocation_size, DW
 
   }
 }
-
-

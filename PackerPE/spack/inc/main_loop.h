@@ -10,11 +10,15 @@ class MainLoop:
   public IMainLoop
 {
 public:
-  MainLoop(const std::string& srcFilePath, const std::string& destFilePath):
-    IMainLoop(srcFilePath, destFilePath)
+  MainLoop(const std::string& srcFilePath, const std::string& destFilePath, const PackingOptionsList& packingOptions = {}) :
+    IMainLoop(srcFilePath, destFilePath, packingOptions)
   {}
-  MainLoop(const std::string& srcFilePath, const std::string& destFilePath, std::forward_list<IPackerBasePtr>&& packersVt) :
-    IMainLoop(srcFilePath, destFilePath, std::move(packersVt))
+  MainLoop(
+    const std::string& srcFilePath,
+    const std::string& destFilePath,
+    std::forward_list<IPackerBasePtr>&& packersVt,
+    const PackingOptionsList& packingOptions = {}) :
+    IMainLoop(srcFilePath, destFilePath, std::move(packersVt), packingOptions)
   {}
   ErrorCode PackFile();
 
@@ -42,6 +46,18 @@ public:
         stubData_ = pStubPacker_->ProcessExecutable();
       }
       break;
+    case PackerType::kNewPEBuilder:
+    {
+      auto pNewPEBuilder = &dynamic_cast<INewPEBuilder&>(*packer);
+      pNewPEBuilder->GenerateOutputPEFile(
+        sourceFileBuff,
+        outFileBuffer,
+        std::move(imports_),
+        std::move(stubData_),
+        std::move(newSections_),
+        packingOptions_);
+    }
+    break;
     case PackerType::kLoaderPacker:
       {
         auto pLoaderPacker = &dynamic_cast<ILoaderPacker&>(*packer);

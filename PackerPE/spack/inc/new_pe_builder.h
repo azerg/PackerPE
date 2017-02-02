@@ -4,37 +4,38 @@
 #include <set>
 #include "inew_pe_builder.h"
 
-// hardcoded PackerOptions just for testing. todo(azerg): move it to main packer as external setter
-enum class PackingOptions
-{
-  stripRelocs, // strip relocs in packed file
-};
-typedef std::set<PackingOptions> PackingOptionsList;
-
-class NewPEBuilder: INewPEBuilder
+class NewPEBuilder: public INewPEBuilder
 {
 public:
-  NewPEBuilder(
-    PeFilePtr & srcPeFile
-    , const std::vector<uint8_t>& sourceFileBuff
-    , const std::vector<RequiredDataBlock>& additionalSizeRequest
-    , IImportPacker* pImportPacker
-    , IStubPacker* pStubPacker
-    , ISectionsPacker* pSectionsPacker
-    , ILoaderPacker* pLoaderPacker
+  NewPEBuilder(std::shared_ptr<PeLib::PeFile>& srcPEFile) :
+    INewPEBuilder(srcPEFile)
+  {}
+
+  Expected<std::vector<uint8_t>> GenerateOutputPEFile(
+    const std::vector<uint8_t>& sourceFileBuff
+    , std::vector<uint8_t>& outFileBuffer
+    , ImportsArr imports_
+    , std::vector<uint8_t> stubData_
+    , SectionsArr newSections_
     , const PackingOptionsList& packingOptions);
 
-  Expected<std::vector<uint8_t>> GenerateOutputPEFile();
+  Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const
+  {
+    std::set<PackerType> dependencies{ PackerType::kSectionsPacker, PackerType::kImportPacker, PackerType::kStubPacker };
+
+    if (std::includes(readyPackersList.cbegin(), readyPackersList.cend(), dependencies.cbegin(), dependencies.cend()))
+    {
+      return ErrorCode::kOk;
+    }
+
+    return ErrorCode::kBusy;
+  }
+  std::vector<RequiredDataBlock> GetRequiredDataBlocks() const { return{}; }
 
 private:
-  IImportPacker* importPacker_;
-  IStubPacker* stubPacker_;
-  ISectionsPacker* sectionsPacker_;
-  ILoaderPacker* loaderPacker_;
-  const PackingOptionsList& packingOptions_;
-  const std::vector<uint8_t>& sourceFileBuff_;
-  const std::vector<RequiredDataBlock>& additionalSizeRequest_;
-  PeFilePtr& srcPeFile_;
+  ImportsArr imports_;
+  std::vector<uint8_t> stubData_;
   SectionsArr newSections_;
-  ImportsArr newImports_;
+  const PackingOptionsList packingOptions_;
+  const std::vector<uint8_t> sourceFileBuff_;
 };

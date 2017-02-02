@@ -12,7 +12,7 @@ public:
     const AdditionalDataBlocksType& additionalDataBlocks);
   Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const
   {
-    std::set<PackerType> dependencies{PackerType::kSectionsPacker, PackerType::kImportPacker, PackerType::kStubPacker};
+    std::set<PackerType> dependencies{PackerType::kNewPEBuilder};
 
     if (std::includes(readyPackersList.cbegin(), readyPackersList.cend(), dependencies.cbegin(), dependencies.cend()))
     {

@@ -11,6 +11,7 @@
 #include "import_packer.h"
 #include "stub_packer.h"
 #include "loader_packer.h"
+#include "new_pe_builder.h"
 #include "tiny_logger.h"
 
 typedef std::shared_ptr<PeLib::PeFile> PeFilePtr;
@@ -69,6 +70,7 @@ ErrorCode PackExecutable(const std::string& srcFileName, const std::string& outF
     mainLoop.AddPacker(std::make_shared<LoaderPacker>(pef));
     mainLoop.AddPacker(std::make_shared<StubPacker>(pef));
     mainLoop.AddPacker(std::make_shared<SectionsPacker>(pef));
+    mainLoop.AddPacker(std::make_shared<NewPEBuilder>(pef));
 
     mainLoop.PackFile();
 

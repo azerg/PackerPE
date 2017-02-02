@@ -10,6 +10,7 @@ enum class PackerType
   kSectionsPacker,
   kStubPacker,
   kLoaderPacker,
+  kNewPEBuilder
 };
 
 /*!

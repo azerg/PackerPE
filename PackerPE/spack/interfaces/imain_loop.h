@@ -5,17 +5,23 @@
 #include "istub_packer.h"
 #include "isections_packer.h"
 #include "iimport_packer.h"
+#include "inew_pe_builder.h"
 #include <forward_list>
 
 class IMainLoop
 {
 public:
-  IMainLoop(const std::string& srcFilePath, const std::string& destFilePath) :
+  IMainLoop(const std::string& srcFilePath, const std::string& destFilePath, const PackingOptionsList& packingOptions) :
     srcFilePath_(srcFilePath),
-    destFilePath_(destFilePath)
+    destFilePath_(destFilePath),
+    packingOptions_(packingOptions)
   {}
-  IMainLoop(const std::string& srcFilePath, const std::string& destFilePath, std::forward_list<IPackerBasePtr>&& packersVt) :
-    IMainLoop(srcFilePath, destFilePath)
+  IMainLoop(
+    const std::string& srcFilePath,
+    const std::string& destFilePath,
+    std::forward_list<IPackerBasePtr>&& packersVt,
+    const PackingOptionsList& packingOptions) :
+    IMainLoop(srcFilePath, destFilePath, packingOptions)
   {
     packersVt_ = std::move(packersVt);
   }
@@ -32,4 +38,5 @@ protected:
   std::forward_list<IPackerBasePtr> packersVt_;
   const std::string srcFilePath_;
   const std::string destFilePath_;
+  PackingOptionsList packingOptions_;
 };
