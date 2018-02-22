@@ -1,19 +1,18 @@
 set(expected_cmn ${common_inc}/alexandrescu)
 
-file(GLOB_RECURSE MainProjInc "inc/*.*" "interfaces/*.*" "${CMAKE_HOME_DIRECTORY}/common/inc/*.*")
+file(GLOB_RECURSE MainProjInc "inc/*.*" "${CMAKE_HOME_DIRECTORY}/common/inc/*.*")
 file(GLOB_RECURSE MainProjSrc "src/*.*" "${CMAKE_HOME_DIRECTORY}/common/src/*.*")
 
 #---------------------------------------------------------------------------------
 set(PRJ_DIR ${CMAKE_HOME_DIRECTORY}/spack)
 
 set(InterfacesInc
-	${PRJ_DIR}/interfaces/iimport_packer.h
-	${PRJ_DIR}/interfaces/inew_pe_builder.h
-	${PRJ_DIR}/interfaces/ipacker_base.h
-	${PRJ_DIR}/interfaces/isections_packer.h
-	${PRJ_DIR}/interfaces/istub_packer.h
-	${PRJ_DIR}/interfaces/iloader_packer.h
-	${PRJ_DIR}/interfaces/imain_loop.h
+	${PRJ_DIR}/inc/iimport_packer.h
+	${PRJ_DIR}/inc/inew_pe_builder.h
+	${PRJ_DIR}/inc/ipacker_base.h
+	${PRJ_DIR}/inc/isections_packer.h
+	${PRJ_DIR}/inc/istub_packer.h
+	${PRJ_DIR}/inc/iloader_packer.h
 )
 source_group("Header Files\\interfaces" FILES ${InterfacesInc})
 
@@ -32,7 +31,7 @@ source_group("Header Files\\commons" FILES ${CommonsInc})
 
 find_package(Boost 1.36.0 REQUIRED program_options filesystem system)
 
-include_directories(${BOOST_ROOT} ${PELIB_ROOT} "inc" "interfaces" ${expected_cmn} ${common_inc})
+include_directories(${BOOST_INCLUDEDIR} ${PELIB_ROOT} "inc" ${expected_cmn} ${common_inc})
 
 add_executable(${SOLUTION_NAME} ${MainProjSrc} ${MainProjInc})
 

@@ -45,7 +45,7 @@ void dumpImportDirectory(
   , ImportsArr& importOut
   , PeLib::dword newImportTableRVA
   , PeLib::dword stubDataRVA
-  , stub::STUB_DATA* stubDataToUpdate)
+  , stub::STUB_DATA& stubDataToUpdate)
 {
   if (peFile.readImportDirectory() != NO_ERROR)
   {
@@ -57,13 +57,13 @@ void dumpImportDirectory(
 
   // filling new import table
   auto newImp = GenerateDefaultImports<bits>(stubDataRVA);
-  newImp.rebuild(importOut.new_imports, newImportTableRVA, reinterpret_cast<PeLib::dword*>(stubDataToUpdate));
+  newImp.rebuild(importOut.new_imports, newImportTableRVA, reinterpret_cast<PeLib::dword*>(&stubDataToUpdate));
 }
 
 class DumpImportsVisitor : public PeLib::PeFileVisitor
 {
 public:
-  DumpImportsVisitor(ImportsArr& importOut, PeLib::dword newImportTableRVA, PeLib::dword stubRVA, stub::STUB_DATA* stubDataToUpdate):
+  DumpImportsVisitor(ImportsArr& importOut, PeLib::dword newImportTableRVA, PeLib::dword stubRVA, stub::STUB_DATA& stubDataToUpdate):
     importOut_(importOut)
     , newImportTableRVA_(newImportTableRVA)
     , stubRVA_(stubRVA)
@@ -81,10 +81,10 @@ private:
   ImportsArr& importOut_;
   PeLib::dword newImportTableRVA_;
   PeLib::dword stubRVA_;
-  stub::STUB_DATA* stubDataToUpdate_;
+  stub::STUB_DATA& stubDataToUpdate_;
 };
 
-ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, std::vector<uint8_t>& stubDataToUpdate)
+ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate)
 {
   // pick last section VA to use it as new imports VA
   auto additionalImportsBlock = std::find_if(
@@ -115,7 +115,7 @@ ImportsArr ImportPacker::ProcessExecutable(const AdditionalDataBlocksType& addit
   }
 
   ImportsArr importsData;
-  DumpImportsVisitor importsVisitor(importsData, newImportTableRVA, additionalStubDataBlock->virtualOffset, reinterpret_cast<stub::STUB_DATA*>(stubDataToUpdate.data()));
+  DumpImportsVisitor importsVisitor(importsData, newImportTableRVA, additionalStubDataBlock->virtualOffset, stubDataToUpdate);
   srcPEFile_->visit(importsVisitor);
 
   return importsData;
@@ -126,7 +126,7 @@ std::vector<RequiredDataBlock> ImportPacker::GetRequiredDataBlocks() const
   ImportsArr importsData;
   stub::STUB_DATA fake_stub_data;
 
-  DumpImportsVisitor importsVisitor(importsData, 0, 0, &fake_stub_data);
+  DumpImportsVisitor importsVisitor(importsData, 0, 0, fake_stub_data);
   srcPEFile_->visit(importsVisitor);
 
   std::vector<RequiredDataBlock> result;

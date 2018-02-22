@@ -26,5 +26,5 @@ public:
     IPackerBase(srcPEFile, PackerType::kImportPacker)
   {}
   virtual ~IImportPacker(){};
-  virtual ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, std::vector<uint8_t>& stubDataToUpdate) = 0;
+  virtual ImportsArr ProcessExecutable(const AdditionalDataBlocksType& additionalDataBlocks, stub::STUB_DATA& stubDataToUpdate) = 0;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include "includes.h"
 #include "ipacker_base.h"
 #include "isections_packer.h"
@@ -14,7 +15,10 @@ public:
     , stubData_{}
   {}
   virtual ~IStubPacker(){};
-  virtual std::vector<uint8_t> ProcessExecutable() = 0;
+  virtual void ProcessExecutable(
+    std::vector<uint8_t>& sourceFileBuff
+    , const AdditionalDataBlocksType& additionalDataBlocks) = 0;
+  virtual stub::STUB_DATA& GetStubData(){ return stubData_; }
 
 protected:
   stub::STUB_DATA stubData_;

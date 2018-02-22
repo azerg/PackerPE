@@ -6,6 +6,14 @@
 #include <iostream>
 #include <set>
 
+// hardcoded PackerOptions just for testing. todo(azerg): move it to main packer as external setter
+enum class PackingOptions
+{
+  stripRelocs, // strip relocs in packed file
+};
+typedef std::set<PackingOptions> PackingOptionsList;
+PackingOptionsList gPackingOptions{PackingOptions::stripRelocs};
+
 uint32_t rebuildMZHeader(PeFilePtr& peFile, std::vector<uint8_t>& outFileBuffer, const std::vector<uint8_t>& sourceFileBuff)
 {
   std::vector<PeLib::byte> mzHeadBuffer;
@@ -51,10 +59,12 @@ public:
   RebuildPeHeaderVisitor(
     std::vector<uint8_t>& outFileBuffer
     , const SectionsArr& newSections
+    , const ImportsArr& newImports
     , uint32_t& offset
     , const PackingOptionsList& packingOptions) :
     outFileBuffer_(outFileBuffer)
     , newSections_(newSections)
+    , newImports_(newImports)
     , offset_(offset)
     , packingOptions_(packingOptions)
   {}
@@ -63,6 +73,7 @@ public:
 private:
   std::vector<uint8_t>& outFileBuffer_;
   const SectionsArr& newSections_;
+  const ImportsArr& newImports_;
   uint32_t& offset_;
   const PackingOptionsList& packingOptions_;
 
@@ -151,21 +162,36 @@ private:
   }
 };
 
-std::vector<uint8_t> stubDataVt;
+//==================================================================================
 
-Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile(
-  const std::vector<uint8_t>& sourceFileBuff
-  , std::vector<uint8_t>& outFileBuffer
-  , ImportsArr imports_
-  , std::vector<uint8_t> stubData_
-  , SectionsArr newSections_
-  , const PackingOptionsList& packingOptions
-)
+NewPEBuilder::NewPEBuilder(
+  PeFilePtr& srcPeFile
+  , const std::vector<uint8_t>& sourceFileBuff
+  , const std::vector<RequiredDataBlock>& additionalSizeRequest
+  , IImportPacker* pImportPacker
+  , IStubPacker* pStubPacker
+  , ISectionsPacker* pSectionsPacker
+  , ILoaderPacker* pLoaderPacker):
+  srcPeFile_(srcPeFile)
+  , sourceFileBuff_(sourceFileBuff)
+  , additionalSizeRequest_(additionalSizeRequest)
+  , importPacker_(pImportPacker)
+  , stubPacker_(pStubPacker)
+  , sectionsPacker_(pSectionsPacker)
+  , loaderPacker_(pLoaderPacker)
 {
-  auto offset = rebuildMZHeader(srcPEFile_, outFileBuffer, sourceFileBuff_);
+  newSections_ = pSectionsPacker->ProcessExecutable(sourceFileBuff, additionalSizeRequest_);
+  // new import RVA passed here
+  newImports_ = importPacker_->ProcessExecutable(newSections_.additionalDataBlocks, stubPacker_->GetStubData());
+}
 
-  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, offset, packingOptions_);
-  srcPEFile_->visit(peVisitor);
+Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile()
+{
+  std::vector<uint8_t> outFileBuffer;
+  auto offset = rebuildMZHeader(srcPeFile_, outFileBuffer, sourceFileBuff_);
+
+  RebuildPeHeaderVisitor peVisitor(outFileBuffer, newSections_, newImports_, offset, gPackingOptions);
+  srcPeFile_->visit(peVisitor);
 
   //--------------------------------------------------------------------------------
   // configure sections data
@@ -183,12 +209,12 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile(
   {
     if (importBlock.packerParam == (int32_t)ImportBlockTypes::kNewImportData)
     {
-      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, imports_.new_imports);
+      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.new_imports);
     }
     else
     if (importBlock.packerParam == (int32_t)ImportBlockTypes::kOldImportData)
     {
-      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, imports_.old_imports);
+      utils::ReplaceContainerData(outFileBuffer, importBlock.rawOffset, newImports_.old_imports);
     }
     else
     {
@@ -198,14 +224,12 @@ Expected<std::vector<uint8_t>> NewPEBuilder::GenerateOutputPEFile(
 
   //--------------------------------------------------------------------------------
   // Insert stub data
-  auto stubBlock = utils::GetSingleAdditionalBlock(newSections_.additionalDataBlocks, PackerType::kStubPacker);
-
-  utils::ReplaceContainerData(outFileBuffer, stubBlock.rawOffset, stubDataVt);
+  stubPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
 
   //--------------------------------------------------------------------------------
   // Insert loader data
 
-  //loaderPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
+  loaderPacker_->ProcessExecutable(outFileBuffer, newSections_.additionalDataBlocks);
 
   return outFileBuffer;
 }

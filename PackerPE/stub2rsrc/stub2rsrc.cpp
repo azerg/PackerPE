@@ -10,6 +10,8 @@
 #include <Windows.h>
 #include "../PELib/MemFile.h"
 
+#pragma comment(lib, "PELib.lib")
+
 // using:
 // app.exe [source.exe path] [dest bin file path]
 

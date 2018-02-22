@@ -2,11 +2,9 @@
 
 enum class ErrorCode
 {
-  kOk,
-  kFailed,
-  kBusy,
-  kFatalError,
-  kFileNotFound,
-  kInvalidPEFile,
-  kSectionPackError,
+  ERROR_SUCC,
+  FATAL_ERROR,
+  FILE_NOT_FOUND,
+  INVALID_PE_FILE,
+  SECTION_PACK_ERROR,
 };

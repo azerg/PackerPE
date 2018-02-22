@@ -10,16 +10,16 @@
 namespace utils
 {
   template <class OutFileBufferType, class OffsetType, class NewDataContainerType>
-  void ReplaceContainerData(OutFileBufferType& outFileBuffer, OffsetType rawOffset, NewDataContainerType& newData)
+  void ReplaceContainerData(OutFileBufferType& outFileBuffer, OffsetType rawOffset, NewDataContainerType& new_imports)
   {
     // removing preallocated buffer
     outFileBuffer.erase(
       outFileBuffer.begin() + rawOffset
-      , outFileBuffer.begin() + rawOffset + newData.size());
-    // inserting new data
+      , outFileBuffer.begin() + rawOffset + new_imports.size());
+    // inserting new import data
     outFileBuffer.insert(
       outFileBuffer.begin() + rawOffset
-      , newData.cbegin(), newData.cend());
+      , new_imports.cbegin(), new_imports.cend());
   }
 
   template <class SourceContainerTypeT, class PackerTypeT>

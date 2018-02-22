@@ -1,8 +1,6 @@
 #pragma once
 
 #include "includes.h"
-#include <set>
-#include <vector>
 
 enum class PackerType
 {
@@ -10,7 +8,6 @@ enum class PackerType
   kSectionsPacker,
   kStubPacker,
   kLoaderPacker,
-  kNewPEBuilder
 };
 
 /*!
@@ -58,11 +55,8 @@ public:
   * Goal of this proc is to make all packer's pieces to be completely
   * independent.
   */
-  virtual Expected<ErrorCode> IsReady(const std::set<PackerType>& readyPackersList) const = 0;
-  PackerType GetPackerType() const noexcept { return packerType_; }
+  virtual Expected<ErrorCode> IsReady() const = 0;
 protected:
   std::shared_ptr<PeLib::PeFile> srcPEFile_;
   PackerType packerType_;
 };
-
-typedef std::shared_ptr<IPackerBase> IPackerBasePtr;

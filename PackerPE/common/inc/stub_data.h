@@ -17,6 +17,8 @@ namespace stub
     // todo(azerg): maybe replace code below with complete PE-header :D
     DWORD dwOriginalRelocVA;
     DWORD dwOriginalRelocSize;
+    DWORD dwOriginalIATVA;
+    DWORD dwOriginalIATSize; // todo(azerg): remove this field?
     DWORD dwOriginalImportVA;
     DWORD dwOriginalImportSize;
   }STUB_DATA, *PSTUB_DATA;
